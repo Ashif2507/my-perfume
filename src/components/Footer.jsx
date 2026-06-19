@@ -30,6 +30,34 @@ export default function Footer() {
     alert('Thank you for subscribing to the AURA newsletter!');
   };
 
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    if (window.navigateTo) {
+      window.navigateTo('/');
+    } else {
+      window.location.href = '/';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAnchorClick = (e, targetSelector) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      if (window.navigateTo) {
+        window.navigateTo('/');
+      } else {
+        window.location.href = '/';
+      }
+      setTimeout(() => {
+        const el = document.querySelector(targetSelector);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    } else {
+      const el = document.querySelector(targetSelector);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-luxury-dark border-t border-luxury-gold/10 pt-20 pb-10 relative overflow-hidden">
       
@@ -70,10 +98,9 @@ export default function Footer() {
       {/* Footer Links & Brand Intro Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-          
-          {/* Brand Intro Column */}
+                    {/* Brand Intro Column */}
           <div className="md:col-span-4 space-y-6 text-left">
-            <a href="#" className="flex items-center space-x-2">
+            <a href="/" onClick={handleLogoClick} className="flex items-center space-x-2">
               <Sparkles className="h-5 w-5 text-luxury-gold" />
               <span className="font-serif text-xl font-bold tracking-[0.2em] text-white">
                 AURA
@@ -101,10 +128,10 @@ export default function Footer() {
             <div>
               <h5 className="text-xs uppercase tracking-widest text-luxury-gold font-bold mb-4">Collections</h5>
               <ul className="space-y-2.5 text-sm font-light text-gray-400">
-                <li><a href="#categories" className="hover:text-white transition-colors">Floral Palette</a></li>
-                <li><a href="#categories" className="hover:text-white transition-colors">Woody & Earthy</a></li>
-                <li><a href="#categories" className="hover:text-white transition-colors">Oriental Spices</a></li>
-                <li><a href="#categories" className="hover:text-white transition-colors">Fresh Citrus</a></li>
+                <li><a href="#categories" onClick={(e) => handleAnchorClick(e, '#categories')} className="hover:text-white transition-colors">Floral Palette</a></li>
+                <li><a href="#categories" onClick={(e) => handleAnchorClick(e, '#categories')} className="hover:text-white transition-colors">Woody & Earthy</a></li>
+                <li><a href="#categories" onClick={(e) => handleAnchorClick(e, '#categories')} className="hover:text-white transition-colors">Oriental Spices</a></li>
+                <li><a href="#categories" onClick={(e) => handleAnchorClick(e, '#categories')} className="hover:text-white transition-colors">Fresh Citrus</a></li>
               </ul>
             </div>
 

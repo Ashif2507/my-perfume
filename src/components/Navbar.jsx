@@ -6,11 +6,49 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
   const [showSearch, setShowSearch] = useState(false);
 
   const navLinks = [
-    { name: 'Collections', href: '#categories' },
-    { name: 'Bestsellers', href: '#products' },
-    { name: 'Exclusive Offers', href: '#offers' },
-    { name: 'Testimonials', href: '#reviews' },
+    { name: 'New Arrivals', href: '/new-arrivals', isPage: true },
+    { name: 'Gift Sets', href: '/gift-sets', isPage: true },
+    { name: 'Best Sellers', href: '/best-sellers', isPage: true },
+    { name: 'Collections', href: '/collection', isPage: true },
+    { name: 'Exclusive Offers', href: '/exclusive-offers', isPage: true },
+    { name: 'Testimonials', href: '/testimonials', isPage: true },
   ];
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    if (window.navigateTo) {
+      window.navigateTo('/');
+    } else {
+      window.location.href = '/';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavClick = (e, link) => {
+    e.preventDefault();
+    if (link.isPage) {
+      if (window.navigateTo) {
+        window.navigateTo(link.href);
+      } else {
+        window.location.href = link.href;
+      }
+    } else {
+      if (window.location.pathname !== '/') {
+        if (window.navigateTo) {
+          window.navigateTo('/');
+        } else {
+          window.location.href = '/';
+        }
+        setTimeout(() => {
+          const el = document.querySelector(link.href);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else {
+        const el = document.querySelector(link.href);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <nav className="glass-nav fixed top-0 left-0 w-full z-50 transition-all duration-300">
@@ -19,7 +57,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <a href="#" className="flex items-center space-x-2">
+            <a href="/" onClick={handleLogoClick} className="flex items-center space-x-2">
               <Sparkles className="h-6 w-6 text-luxury-gold animate-pulse-subtle" />
               <span className="font-serif text-2xl font-bold tracking-[0.25em] text-white hover:text-luxury-gold transition-colors">
                 AURA
@@ -33,7 +71,12 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-sm tracking-widest text-gray-300 hover:text-luxury-gold uppercase font-medium transition-colors duration-200"
+                onClick={(e) => handleNavClick(e, link)}
+                className={`text-sm tracking-widest uppercase font-medium transition-colors duration-200 ${
+                  window.location.pathname === link.href
+                    ? 'text-luxury-gold'
+                    : 'text-gray-300 hover:text-luxury-gold'
+                }`}
               >
                 {link.name}
               </a>
@@ -130,8 +173,15 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
             <a
               key={link.name}
               href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="block text-base tracking-widest text-gray-300 hover:text-luxury-gold uppercase font-medium py-2 border-b border-white/5"
+              onClick={(e) => {
+                setIsOpen(false);
+                handleNavClick(e, link);
+              }}
+              className={`block text-base tracking-widest uppercase font-medium py-2 border-b border-white/5 ${
+                window.location.pathname === link.href
+                  ? 'text-luxury-gold'
+                  : 'text-gray-300 hover:text-luxury-gold'
+              }`}
             >
               {link.name}
             </a>

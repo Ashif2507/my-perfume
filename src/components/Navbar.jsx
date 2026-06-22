@@ -52,8 +52,8 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
 
   return (
     <nav className="glass-nav fixed top-0 left-0 w-full z-50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+        <div className="flex items-center justify-between h-20 xl:gap-x-8">
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
@@ -66,12 +66,12 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden xl:flex xl:gap-x-5 2xl:gap-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
-                className={`text-sm tracking-widest uppercase font-medium transition-colors duration-200 ${
+                className={`text-xs 2xl:text-sm tracking-widest uppercase font-medium transition-colors duration-200 whitespace-nowrap ${
                   location.pathname === link.href
                     ? 'text-luxury-gold'
                     : 'text-gray-300 hover:text-luxury-gold'
@@ -83,95 +83,103 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
           </div>
 
           {/* Utility Icons */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden xl:flex items-center xl:gap-x-7 2xl:gap-x-9">
             
-            {/* Search Bar Dropdown */}
+            {/* Search Dropdown Panel */}
             <div className="relative flex items-center" ref={searchRef}>
-              <div className={`flex items-center transition-all duration-300 ${showSearch ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}>
-                <input
-                  type="text"
-                  placeholder="Search fragrances..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-luxury-accent/80 border border-luxury-gold/20 rounded-full px-4 py-1.5 text-xs text-white focus:outline-none focus:border-luxury-gold transition-all"
-                />
-              </div>
               <button 
                 onClick={() => setShowSearch(!showSearch)} 
-                className="text-gray-300 hover:text-luxury-gold transition-colors p-1 z-10 ml-1"
+                className={`text-gray-300 hover:text-luxury-gold transition-colors p-1.5 lg:p-2 z-10 ${showSearch ? 'text-luxury-gold' : ''}`}
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" />
               </button>
 
-              {/* Search Results & Category Dropdown */}
-              {showSearch && (
-                <div className="absolute top-10 right-0 w-80 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2 z-50">
-                  {/* Category Filter Chips */}
-                  <div className="flex gap-1.5 p-3 border-b border-white/5 overflow-x-auto scrollbar-none bg-luxury-accent/30">
-                    {['All', 'Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full transition-all border whitespace-nowrap cursor-pointer ${
-                          selectedCategory === cat
-                            ? 'bg-luxury-gold text-luxury-dark border-luxury-gold font-bold'
-                            : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:border-white/20'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
+              {/* Floating Search Panel */}
+              <div 
+                className={`absolute top-10 right-0 w-80 sm:w-96 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2 z-50 transition-all duration-300 origin-top-right ${
+                  showSearch ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'
+                }`}
+              >
+                {/* Search Input Area */}
+                <div className="p-3 border-b border-white/5 bg-luxury-dark/50">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search fragrances..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-luxury-accent/50 border border-luxury-gold/20 rounded-full py-2 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-luxury-gold transition-all"
+                    />
+                    <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
                   </div>
-
-                  {searchQuery ? (
-                    searchResults.length > 0 ? (
-                      <div className="max-h-64 overflow-y-auto">
-                        {searchResults.map(result => (
-                          <Link 
-                            key={result.id} 
-                            to={`/product/${result.id}`}
-                            onClick={() => { setShowSearch(false); setSearchQuery(''); setSelectedCategory('All'); }}
-                            className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
-                          >
-                            <img src={result.image} alt="" className="w-10 h-10 rounded object-cover bg-luxury-accent" />
-                            <div>
-                              <p className="text-sm text-white font-medium">{result.name}</p>
-                              <p className="text-[10px] text-gray-400">{result.category} • ${result.price}</p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
-                    )
-                  ) : (
-                    <div className="p-4 text-left">
-                      <p className="text-[10px] uppercase tracking-widest text-luxury-gold font-semibold mb-2">Popular Collections</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
-                          <button
-                            key={cat}
-                            type="button"
-                            onClick={() => { setSelectedCategory(cat); setSearchQuery(cat); }}
-                            className="text-left text-xs text-gray-300 hover:text-luxury-gold transition-colors py-1.5 px-2.5 bg-white/5 rounded border border-white/5 cursor-pointer"
-                          >
-                            ✨ {cat}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              )}
+
+                {/* Category Filter Chips */}
+                <div className="flex gap-1.5 p-3 border-b border-white/5 overflow-x-auto scrollbar-none bg-luxury-accent/30">
+                  {['All', 'Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full transition-all border whitespace-nowrap cursor-pointer ${
+                        selectedCategory === cat
+                          ? 'bg-luxury-gold text-luxury-dark border-luxury-gold font-bold'
+                          : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:border-white/20'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Search Results */}
+                {searchQuery ? (
+                  searchResults.length > 0 ? (
+                    <div className="max-h-64 overflow-y-auto">
+                      {searchResults.map(result => (
+                        <Link 
+                          key={result.id} 
+                          to={`/product/${result.id}`}
+                          onClick={() => { setShowSearch(false); setSearchQuery(''); setSelectedCategory('All'); }}
+                          className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
+                        >
+                          <img src={result.image} alt="" className="w-10 h-10 rounded object-cover bg-luxury-accent" />
+                          <div>
+                            <p className="text-sm text-white font-medium">{result.name}</p>
+                            <p className="text-[10px] text-gray-400">{result.category} • ${result.price}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
+                  )
+                ) : (
+                  <div className="p-4 text-left">
+                    <p className="text-[10px] uppercase tracking-widest text-luxury-gold font-semibold mb-2">Popular Collections</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => { setSelectedCategory(cat); setSearchQuery(cat); }}
+                          className="text-left text-xs text-gray-300 hover:text-luxury-gold transition-colors py-1.5 px-2.5 bg-white/5 rounded border border-white/5 cursor-pointer"
+                        >
+                          ✨ {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
               <button 
                 onClick={() => setShowProfile(!showProfile)}
-                className="text-gray-300 hover:text-luxury-gold transition-colors p-1" 
+                className="text-gray-300 hover:text-luxury-gold transition-colors p-1.5 md:p-2" 
                 aria-label="Profile"
               >
                 <User className="h-5 w-5" />
@@ -197,20 +205,20 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
             </div>
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Wishlist">
+            <Link to="/wishlist" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1.5 md:p-2" aria-label="Wishlist">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute top-0 right-0 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
+            <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1.5 md:p-2" aria-label="Shopping Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
+                <span className="absolute top-0 right-0 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
@@ -218,7 +226,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-4">
+          <div className="xl:hidden flex items-center space-x-4">
             <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
@@ -242,7 +250,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
 
       {/* Mobile Menu Panel */}
       <div 
-        className={`md:hidden absolute top-20 left-0 w-full bg-luxury-dark/95 border-b border-luxury-gold/10 backdrop-blur-lg transition-all duration-300 ease-in-out ${
+        className={`xl:hidden absolute top-20 left-0 w-full bg-luxury-dark/95 border-b border-luxury-gold/10 backdrop-blur-lg transition-all duration-300 ease-in-out ${
           isOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-4 invisible'
         }`}
       >

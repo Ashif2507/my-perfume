@@ -1,54 +1,46 @@
-import React, { useState } from 'react';
-import { ShoppingBag, Heart, Search, User, Menu, X, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ShoppingBag, Heart, Search, User, Menu, X, Sparkles, LogOut, Package, UserCircle } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { allProductsData } from '../data/products';
 
 export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchRef = useRef(null);
+  const profileRef = useRef(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) setShowSearch(false);
+      if (profileRef.current && !profileRef.current.contains(event.target)) setShowProfile(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
-    { name: 'New Arrivals', href: '/new-arrivals', isPage: true },
-    { name: 'Gift Sets', href: '/gift-sets', isPage: true },
-    { name: 'Best Sellers', href: '/best-sellers', isPage: true },
-    { name: 'Collections', href: '/collection', isPage: true },
-    { name: 'Exclusive Offers', href: '/exclusive-offers', isPage: true },
-    { name: 'Testimonials', href: '/testimonials', isPage: true },
+    { name: 'New Arrivals', href: '/new-arrivals' },
+    { name: 'Gift Sets', href: '/gift-sets' },
+    { name: 'Best Sellers', href: '/best-sellers' },
+    { name: 'Collections', href: '/collection' },
+    { name: 'Exclusive Offers', href: '/exclusive-offers' },
+    { name: 'Testimonials', href: '/testimonials' },
   ];
 
-  const handleLogoClick = (e) => {
-    e.preventDefault();
-    if (window.navigateTo) {
-      window.navigateTo('/');
-    } else {
-      window.location.href = '/';
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleNavClick = (e, link) => {
-    e.preventDefault();
-    if (link.isPage) {
-      if (window.navigateTo) {
-        window.navigateTo(link.href);
-      } else {
-        window.location.href = link.href;
-      }
-    } else {
-      if (window.location.pathname !== '/') {
-        if (window.navigateTo) {
-          window.navigateTo('/');
-        } else {
-          window.location.href = '/';
-        }
-        setTimeout(() => {
-          const el = document.querySelector(link.href);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
-      } else {
-        const el = document.querySelector(link.href);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
+  const searchResults = searchQuery
+    ? allProductsData.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+    : [];
 
   return (
     <nav className="glass-nav fixed top-0 left-0 w-full z-50 transition-all duration-300">
@@ -57,89 +49,140 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <a href="/" onClick={handleLogoClick} className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <Sparkles className="h-6 w-6 text-luxury-gold animate-pulse-subtle" />
               <span className="font-serif text-2xl font-bold tracking-[0.25em] text-white hover:text-luxury-gold transition-colors">
                 AURA
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex space-x-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link)}
+                to={link.href}
                 className={`text-sm tracking-widest uppercase font-medium transition-colors duration-200 ${
-                  window.location.pathname === link.href
+                  location.pathname === link.href
                     ? 'text-luxury-gold'
                     : 'text-gray-300 hover:text-luxury-gold'
                 }`}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
 
           {/* Utility Icons */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Search Bar Toggle */}
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Search fragrances..."
-                className={`bg-luxury-accent/60 border border-luxury-gold/20 rounded-full px-4 py-1.5 text-xs text-white focus:outline-none focus:border-luxury-gold transition-all duration-300 ${
-                  showSearch ? 'w-48 opacity-100' : 'w-0 opacity-0 pointer-events-none'
-                }`}
-              />
+            
+            {/* Search Bar Dropdown */}
+            <div className="relative flex items-center" ref={searchRef}>
+              <div className={`flex items-center transition-all duration-300 ${showSearch ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}>
+                <input
+                  type="text"
+                  placeholder="Search fragrances..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-luxury-accent/80 border border-luxury-gold/20 rounded-full px-4 py-1.5 text-xs text-white focus:outline-none focus:border-luxury-gold transition-all"
+                />
+              </div>
               <button 
                 onClick={() => setShowSearch(!showSearch)} 
-                className="text-gray-300 hover:text-luxury-gold transition-colors p-1"
+                className="text-gray-300 hover:text-luxury-gold transition-colors p-1 z-10 ml-1"
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" />
               </button>
+
+              {/* Search Results Dropdown */}
+              {showSearch && searchQuery && (
+                <div className="absolute top-10 right-0 w-72 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2">
+                  {searchResults.length > 0 ? (
+                    <div className="max-h-64 overflow-y-auto">
+                      {searchResults.map(result => (
+                        <Link 
+                          key={result.id} 
+                          to={`/product/${result.id}`}
+                          onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+                          className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5"
+                        >
+                          <img src={result.image} alt="" className="w-10 h-10 rounded object-cover bg-luxury-accent" />
+                          <div>
+                            <p className="text-sm text-white font-medium">{result.name}</p>
+                            <p className="text-[10px] text-gray-400">{result.category} • ${result.price}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Profile */}
-            <button className="text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Profile">
-              <User className="h-5 w-5" />
-            </button>
+            {/* Profile Dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button 
+                onClick={() => setShowProfile(!showProfile)}
+                className="text-gray-300 hover:text-luxury-gold transition-colors p-1" 
+                aria-label="Profile"
+              >
+                <User className="h-5 w-5" />
+              </button>
+              
+              {showProfile && (
+                <div className="absolute top-10 right-0 w-48 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2 py-2">
+                  <div className="px-4 py-2 border-b border-white/5 mb-2">
+                    <p className="text-xs text-luxury-gold font-medium uppercase tracking-widest">Welcome</p>
+                    <p className="text-sm text-white truncate">Guest User</p>
+                  </div>
+                  <button onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                    <UserCircle className="h-4 w-4" /> My Profile
+                  </button>
+                  <button onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                    <Package className="h-4 w-4" /> Order History
+                  </button>
+                  <Link to="/admin" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-luxury-gold hover:bg-white/5 transition-colors">
+                    <LogOut className="h-4 w-4" /> Admin Panel
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Wishlist */}
-            <button className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Wishlist">
+            <Link to="/wishlist" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Wishlist">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
                   {wishlistCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             {/* Cart */}
-            <button className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
+            <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-4">
-            {/* Mobile Shopping Cart Indicator */}
-            <button className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
+            <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-dark text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -164,38 +207,46 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
             <input
               type="text"
               placeholder="Search fragrances..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-luxury-accent border border-luxury-gold/20 rounded-full py-2 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-luxury-gold"
             />
             <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+            {/* Mobile Search Results */}
+            {searchQuery && searchResults.length > 0 && (
+              <div className="mt-2 bg-luxury-card rounded-lg overflow-hidden border border-white/5">
+                {searchResults.map(res => (
+                  <Link key={res.id} to={`/product/${res.id}`} className="block p-3 border-b border-white/5 text-sm text-white">
+                    {res.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
-              onClick={(e) => {
-                setIsOpen(false);
-                handleNavClick(e, link);
-              }}
+              to={link.href}
               className={`block text-base tracking-widest uppercase font-medium py-2 border-b border-white/5 ${
-                window.location.pathname === link.href
+                location.pathname === link.href
                   ? 'text-luxury-gold'
                   : 'text-gray-300 hover:text-luxury-gold'
               }`}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
 
           <div className="flex justify-around pt-4 border-t border-white/5">
-            <button className="flex items-center space-x-2 text-gray-300 hover:text-luxury-gold">
+            <Link to="/admin" className="flex items-center space-x-2 text-gray-300 hover:text-luxury-gold">
               <User className="h-5 w-5" />
               <span className="text-sm">Account</span>
-            </button>
-            <button className="relative flex items-center space-x-2 text-gray-300 hover:text-luxury-gold">
+            </Link>
+            <Link to="/wishlist" className="relative flex items-center space-x-2 text-gray-300 hover:text-luxury-gold">
               <Heart className="h-5 w-5" />
               <span className="text-sm">Wishlist ({wishlistCount})</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

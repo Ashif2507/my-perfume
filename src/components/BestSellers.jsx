@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Star, Heart, ShoppingCart, Check, ShieldCheck, TrendingUp, Award, Users, Filter, Search, Flame } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -199,11 +200,13 @@ export default function BestSellers({ onAddToCart, onAddToWishlist }) {
     <div className="group relative rounded-2xl overflow-hidden bg-luxury-card border border-white/5 flex flex-col p-4 glass-card-hover">
       {/* Image */}
       <div className="relative aspect-square rounded-xl overflow-hidden bg-luxury-accent/50 mb-5">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-        />
+        <Link to={`/product/${item.id}`} className="block w-full h-full">
+          <img
+            src={item.image}
+            alt={item.name}
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+          />
+        </Link>
         <span className={`absolute top-3 left-3 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${item.badgeColor}`}>
           {item.badge}
         </span>
@@ -233,7 +236,9 @@ export default function BestSellers({ onAddToCart, onAddToWishlist }) {
       <div className="flex-grow flex flex-col justify-between text-left">
         <div className="space-y-2">
           <p className="text-[10px] uppercase tracking-widest text-luxury-gold font-semibold">{item.type}</p>
-          <h3 className="font-serif text-lg font-semibold text-white group-hover:text-luxury-goldlight transition-colors">{item.name}</h3>
+          <Link to={`/product/${item.id}`}>
+            <h3 className="font-serif text-lg font-semibold text-white group-hover:text-luxury-goldlight transition-colors">{item.name}</h3>
+          </Link>
           <p className="text-[11px] text-gray-400 font-light leading-relaxed line-clamp-2">{item.desc}</p>
           <div className="bg-luxury-dark/50 border border-white/5 rounded-lg px-2.5 py-2 text-[10px] text-gray-300">
             <span className="text-luxury-gold font-medium">Notes:</span> {item.notes}

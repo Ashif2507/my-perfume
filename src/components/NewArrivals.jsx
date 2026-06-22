@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, Heart, ShoppingCart, Sparkles, Check, Gift, ArrowRight, ShieldCheck, Search, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -235,11 +236,13 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
               >
                 {/* Media Section */}
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-luxury-accent/50 mb-6">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
+                  <Link to={`/product/${product.id}`} className="block w-full h-full">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </Link>
 
                   {/* Badge */}
                   <span className={`absolute top-3 left-3 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${product.badgeColor}`}>
@@ -292,9 +295,11 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
                       </span>
                     </div>
 
-                    <h3 className="font-serif text-lg font-medium text-white group-hover:text-luxury-goldlight transition-colors">
-                      {product.name}
-                    </h3>
+                    <Link to={`/product/${product.id}`}>
+                      <h3 className="font-serif text-lg font-medium text-white group-hover:text-luxury-goldlight transition-colors">
+                        {product.name}
+                      </h3>
+                    </Link>
                     
                     <p className="text-xs text-gray-400 font-light line-clamp-1 italic">
                       Notes: {product.notes}
@@ -377,12 +382,14 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
               >
                 {/* Media cover */}
                 <div className="relative h-56 overflow-hidden bg-luxury-accent">
-                  <img 
-                    src={collection.image} 
-                    alt={collection.title}
-                    className="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-500 opacity-60 group-hover:opacity-85"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-luxury-card via-luxury-card/30 to-transparent" />
+                  <Link to={`/product/${collection.id}`} className="block w-full h-full">
+                    <img 
+                      src={collection.image} 
+                      alt={collection.title}
+                      className="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-500 opacity-60 group-hover:opacity-85"
+                    />
+                  </Link>
+                  <div className="absolute inset-0 bg-gradient-to-t from-luxury-card via-luxury-card/30 to-transparent pointer-events-none" />
                   
                   <span className="absolute top-4 left-4 z-10 text-[9px] uppercase tracking-widest font-bold bg-luxury-gold text-luxury-dark px-2.5 py-1 rounded shadow-md">
                     {collection.badge}
@@ -395,9 +402,11 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
                     <span className="text-[10px] text-luxury-gold tracking-widest uppercase font-semibold">
                       {collection.subtitle}
                     </span>
-                    <h3 className="font-serif text-2xl font-bold text-white">
-                      {collection.title}
-                    </h3>
+                    <Link to={`/product/${collection.id}`}>
+                      <h3 className="font-serif text-2xl font-bold text-white group-hover:text-luxury-goldlight transition-colors">
+                        {collection.title}
+                      </h3>
+                    </Link>
                     <p className="text-xs text-gray-400 font-light leading-relaxed">
                       {collection.description}
                     </p>
@@ -475,12 +484,14 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
               <div className="rounded-[22px] bg-luxury-accent/90 backdrop-blur-md p-6 sm:p-8 flex flex-col md:flex-row gap-6 items-center">
                 {/* Media area */}
                 <div className="relative w-40 h-40 flex-shrink-0 bg-luxury-dark/40 border border-white/5 rounded-2xl overflow-hidden p-2 flex items-center justify-center">
-                  <img 
-                    src={edition.image} 
-                    alt={edition.name} 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-2 left-2 bg-rose-600/90 text-white text-[8px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">
+                  <Link to={`/product/${edition.id}`} className="block w-full h-full">
+                    <img 
+                      src={edition.image} 
+                      alt={edition.name} 
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </Link>
+                  <div className="absolute top-2 left-2 bg-rose-600/90 text-white text-[8px] uppercase tracking-wider font-bold px-2 py-0.5 rounded pointer-events-none">
                     Rare
                   </div>
                 </div>
@@ -496,9 +507,11 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-white group-hover:text-luxury-goldlight transition-colors">
-                    {edition.name}
-                  </h3>
+                  <Link to={`/product/${edition.id}`}>
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-white group-hover:text-luxury-goldlight transition-colors">
+                      {edition.name}
+                    </h3>
+                  </Link>
 
                   <p className="text-xs text-gray-400 font-light leading-relaxed">
                     {edition.description}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Gift, Star, Heart, ShoppingCart, Check, ShieldCheck, Search, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -199,11 +200,13 @@ export default function GiftSets({ onAddToCart, onAddToWishlist }) {
               >
                 {/* Media Container */}
                 <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-luxury-accent/50 mb-6">
-                  <img 
-                    src={set.image} 
-                    alt={set.name} 
-                    className="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-500 opacity-70 group-hover:opacity-90"
-                  />
+                  <Link to={`/product/${set.id}`} className="block w-full h-full">
+                    <img 
+                      src={set.image} 
+                      alt={set.name} 
+                      className="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-500 opacity-70 group-hover:opacity-90"
+                    />
+                  </Link>
 
                   {/* Badge */}
                   <span className={`absolute top-4 left-4 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${set.badgeColor}`}>
@@ -239,9 +242,11 @@ export default function GiftSets({ onAddToCart, onAddToWishlist }) {
                       )}
                     </div>
 
-                    <h3 className="font-serif text-xl font-bold text-white group-hover:text-luxury-goldlight transition-colors">
-                      {set.name}
-                    </h3>
+                    <Link to={`/product/${set.id}`}>
+                      <h3 className="font-serif text-xl font-bold text-white group-hover:text-luxury-goldlight transition-colors">
+                        {set.name}
+                      </h3>
+                    </Link>
 
                     <p className="text-xs text-gray-400 font-light leading-relaxed">
                       {set.description}

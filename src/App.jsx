@@ -1,119 +1,110 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+
+// Layouts
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import AdminLayout from './layouts/AdminLayout';
+
+// Customer Pages
 import Hero from './components/Hero';
 import Brands from './components/Brands';
 import Categories from './components/Categories';
 import Products from './components/Products';
 import OfferBanner from './components/OfferBanner';
 import Reviews from './components/Reviews';
-import Footer from './components/Footer';
 import NewArrivals from './components/NewArrivals';
 import GiftSets from './components/GiftSets';
 import BestSellers from './components/BestSellers';
 import CollectionsPage from './components/CollectionsPage';
 import OffersPage from './components/OffersPage';
 import TestimonialsPage from './components/TestimonialsPage';
+import ProductDetails from './pages/ProductDetails';
+import WishlistPage from './pages/WishlistPage';
+import CartPage from './pages/CartPage';
 
-function App() {
-  const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+// Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminCustomers from './pages/admin/AdminCustomers';
+import AdminReviews from './pages/admin/AdminReviews';
 
+// Context
+import { useCart } from './context/CartContext';
+import { useWishlist } from './context/WishlistContext';
+
+// Scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
   useEffect(() => {
-    // Expose client-side navigation handler on window
-    window.navigateTo = (to) => {
-      window.history.pushState({}, '', to);
-      window.dispatchEvent(new Event('pushstate-changed'));
-    };
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-      window.scrollTo(0, 0);
-    };
+function HomePage() {
+  const { addToCart } = useCart();
+  const { toggleWishlist } = useWishlist();
 
-    window.addEventListener('popstate', handleLocationChange);
-    window.addEventListener('pushstate-changed', handleLocationChange);
+  return (
+    <>
+      <Hero />
+      <Brands />
+      <Categories />
+      <Products onAddToCart={addToCart} onAddToWishlist={toggleWishlist} />
+      <OfferBanner />
+      <Reviews />
+    </>
+  );
+}
 
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      window.removeEventListener('pushstate-changed', handleLocationChange);
-    };
-  }, []);
-
-  const handleAddToCart = () => {
-    setCartCount((prev) => prev + 1);
-  };
-
-  const handleAddToWishlist = (val) => {
-    setWishlistCount((prev) => Math.max(0, prev + val));
-  };
-
-  const isNewArrivals = currentPath === '/new-arrivals';
-  const isGiftSets = currentPath === '/gift-sets';
-  const isBestSellers = currentPath === '/best-sellers';
-  const isCollection = currentPath === '/collection';
-  const isOffers = currentPath === '/exclusive-offers';
-  const isTestimonials = currentPath === '/testimonials';
+function CustomerLayout() {
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   return (
     <div className="min-h-screen bg-luxury-dark text-gray-100 font-sans selection:bg-luxury-gold selection:text-luxury-dark">
-      {/* Navigation Header */}
       <Navbar cartCount={cartCount} wishlistCount={wishlistCount} />
-
-      {/* Main Content Sections */}
       <main>
-        {isNewArrivals ? (
-          <NewArrivals 
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
-        ) : isGiftSets ? (
-          <GiftSets 
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
-        ) : isBestSellers ? (
-          <BestSellers
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
-        ) : isCollection ? (
-          <CollectionsPage />
-        ) : isOffers ? (
-          <OffersPage />
-        ) : isTestimonials ? (
-          <TestimonialsPage />
-        ) : (
-          <>
-            {/* Hero Banner Area */}
-            <Hero />
-
-            {/* Featured Luxury Partner Brand Marquee */}
-            <Brands />
-
-            {/* Categories Directory */}
-            <Categories />
-
-            {/* Product Catalog Grid Showcase */}
-            <Products 
-              onAddToCart={handleAddToCart} 
-              onAddToWishlist={handleAddToWishlist} 
-            />
-
-            {/* Promotional Campaign Banner with live timer */}
-            <OfferBanner />
-
-            {/* User Testimonials Grid */}
-            <Reviews />
-          </>
-        )}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/new-arrivals" element={<NewArrivals onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
+          <Route path="/gift-sets" element={<GiftSets onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
+          <Route path="/best-sellers" element={<BestSellers onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
+          <Route path="/collection" element={<CollectionsPage />} />
+          <Route path="/exclusive-offers" element={<OffersPage />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
+        </Routes>
       </main>
-
-      {/* Footer Directory */}
       <Footer />
     </div>
   );
 }
 
-export default App;
+function App() {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="reviews" element={<AdminReviews />} />
+          {/* Default admin redirect */}
+          <Route index element={<AdminDashboard />} />
+        </Route>
+        
+        {/* Customer routes get caught here */}
+        <Route path="/*" element={<CustomerLayout />} />
+      </Routes>
+    </>
+  );
+}
 
+export default App;

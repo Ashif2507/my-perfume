@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, Heart, ShoppingCart, Sparkles, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -174,11 +175,13 @@ export default function Products({ onAddToCart, onAddToWishlist }) {
               <div className="relative aspect-square rounded-xl overflow-hidden bg-luxury-accent/50 mb-6">
                 
                 {/* Product Image */}
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                />
+                <Link to={`/product/${product.id}`} className="block w-full h-full">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                  />
+                </Link>
 
                 {/* Badge Tag */}
                 <span className={`absolute top-3 left-3 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${product.badgeColor}`}>
@@ -228,9 +231,11 @@ export default function Products({ onAddToCart, onAddToWishlist }) {
                   <p className="text-[10px] uppercase tracking-widest text-luxury-gold font-semibold">
                     {product.type}
                   </p>
-                  <h3 className="font-serif text-lg font-medium text-white group-hover:text-luxury-goldlight transition-colors">
-                    {product.name}
-                  </h3>
+                  <Link to={`/product/${product.id}`}>
+                    <h3 className="font-serif text-lg font-medium text-white group-hover:text-luxury-goldlight transition-colors">
+                      {product.name}
+                    </h3>
+                  </Link>
                   
                   {/* Rating Block */}
                   <div className="flex items-center space-x-1.5 pt-1">

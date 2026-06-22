@@ -48,7 +48,7 @@ export default function AdminReviews() {
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h1 className="font-serif text-3xl text-white">Review Moderation</h1>
+        <h1 className="font-serif text-3xl font-bold text-white tracking-wide">Review Moderation</h1>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-grow sm:w-64">
             <input 

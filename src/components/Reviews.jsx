@@ -43,13 +43,16 @@ export default function Reviews() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-3xl md:text-5xl font-semibold text-white tracking-wide">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold">
+            <Award className="h-3.5 w-3.5" />
+            <span>Verified Reviews</span>
+          </div>
+          <h2 className="font-serif text-3xl md:text-5xl font-bold text-white tracking-wide">
             Whispers of Satisfaction
           </h2>
-          <div className="h-0.5 w-16 bg-luxury-gold mx-auto my-4"></div>
-          <p className="text-gray-400 text-sm md:text-base uppercase tracking-[0.2em]">
-            Verified reviews from our fragrance connoisseurs
+          <p className="text-gray-400 font-light text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Discover honest impressions from verified fragrance connoisseurs in our community.
           </p>
         </div>
 

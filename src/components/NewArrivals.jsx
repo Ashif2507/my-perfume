@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Star, Heart, ShoppingCart, Sparkles, Check, Gift, ArrowRight, ShieldCheck, Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
 
-export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
-  const [favorites, setFavorites] = useState({});
+export default function NewArrivals() {
   const [addedItems, setAddedItems] = useState({});
   const [filterFamily, setFilterFamily] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   // 1. Trending Perfumes Data
   const trendingPerfumes = [
@@ -129,17 +132,11 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
   ];
 
   const handleFavoriteToggle = (productId) => {
-    const newFavs = { ...favorites, [productId]: !favorites[productId] };
-    setFavorites(newFavs);
-    if (newFavs[productId]) {
-      onAddToWishlist(1);
-    } else {
-      onAddToWishlist(-1);
-    }
+    toggleWishlist(productId);
   };
 
   const handleAddToCartClick = (productId) => {
-    onAddToCart();
+    addToCart(productId);
     setAddedItems(prev => ({ ...prev, [productId]: true }));
     setTimeout(() => {
       setAddedItems(prev => ({ ...prev, [productId]: false }));
@@ -162,13 +159,13 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
         {/* Subtle gold radial background glow */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.06)_0%,transparent_70%)] pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 text-luxury-gold border border-luxury-gold/30 px-3 py-1 rounded-full bg-luxury-gold/5 animate-fade-in-up">
-            <Sparkles className="h-4.5 w-4.5 animate-pulse" />
-            <span className="text-[10px] tracking-[0.2em] uppercase font-semibold">Seasonal Releases</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold animate-fade-in-up">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+            <span>Seasonal Releases</span>
           </div>
           
-          <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight animate-fade-in-up">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-white tracking-wide animate-fade-in-up">
             The New <span className="text-luxury-gold">Arrivals</span>
           </h1>
           
@@ -253,13 +250,13 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
                   <button 
                     onClick={() => handleFavoriteToggle(product.id)}
                     className={`absolute top-3 right-3 z-10 p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
-                      favorites[product.id] 
+                      isInWishlist(product.id) 
                         ? 'bg-rose-600 border-rose-500 text-white' 
                         : 'bg-luxury-dark/60 border-white/10 text-gray-300 hover:text-rose-500 hover:border-rose-500/50'
                     }`}
                     aria-label="Wishlist"
                   >
-                    <Heart className={`h-4.5 w-4.5 ${favorites[product.id] ? 'fill-current' : ''}`} />
+                    <Heart className={`h-4.5 w-4.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                   </button>
 
                   {/* Hover Overlay Quick Add */}
@@ -536,13 +533,13 @@ export default function NewArrivals({ onAddToCart, onAddToWishlist }) {
                       <button 
                         onClick={() => handleFavoriteToggle(edition.id)}
                         className={`p-2.5 rounded-lg border transition-all duration-300 ${
-                          favorites[edition.id] 
+                          isInWishlist(edition.id) 
                             ? 'bg-rose-600 border-rose-500 text-white' 
                             : 'bg-luxury-dark/40 border-white/5 text-gray-300 hover:text-rose-500'
                         }`}
                         aria-label="Add to wishlist"
                       >
-                        <Heart className="h-4 w-4" />
+                        <Heart className={`h-4 w-4 ${isInWishlist(edition.id) ? 'fill-current text-white' : ''}`} />
                       </button>
 
                       <button

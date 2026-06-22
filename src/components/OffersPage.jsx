@@ -7,11 +7,15 @@ export default function OffersPage() {
     <div className="min-h-screen bg-luxury-dark pt-32 pb-24 relative selection:bg-luxury-gold selection:text-luxury-dark">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-luxury-gold/5 rounded-full filter blur-[120px] pointer-events-none"></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center mb-16">
-        <h1 className="font-serif text-4xl md:text-6xl font-semibold text-white tracking-wide mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center mb-16 space-y-4">
+        <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold">
+          <Gift className="h-3.5 w-3.5" />
+          <span>Atelier Promotions</span>
+        </div>
+        <h1 className="font-serif text-4xl md:text-6xl font-bold text-white tracking-wide">
           Exclusive Offers
         </h1>
-        <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-400 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
           Discover our latest promotions, limited-time sets, and exclusive perks designed to elevate your AURA experience.
         </p>
       </div>

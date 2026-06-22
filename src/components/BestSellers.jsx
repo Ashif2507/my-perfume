@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Sparkles, Star, Heart, ShoppingCart, Check, ShieldCheck, TrendingUp, Award, Users, Filter, Search, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
 
-export default function BestSellers({ onAddToCart, onAddToWishlist }) {
-  const [favorites, setFavorites] = useState({});
+export default function BestSellers() {
   const [addedItems, setAddedItems] = useState({});
   const [activeSection, setActiveSection] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   // ── 1. Top Rated Perfumes ──────────────────────────────────────────────────
   const topRated = [
@@ -176,13 +179,11 @@ export default function BestSellers({ onAddToCart, onAddToWishlist }) {
   const allProducts = [...topRated, ...mostPopular, ...customerFavorites];
 
   const handleFavoriteToggle = (id) => {
-    const updated = { ...favorites, [id]: !favorites[id] };
-    setFavorites(updated);
-    onAddToWishlist(updated[id] ? 1 : -1);
+    toggleWishlist(id);
   };
 
   const handleAddToCartClick = (id) => {
-    onAddToCart();
+    addToCart(id);
     setAddedItems(prev => ({ ...prev, [id]: true }));
     setTimeout(() => setAddedItems(prev => ({ ...prev, [id]: false })), 2000);
   };
@@ -213,13 +214,13 @@ export default function BestSellers({ onAddToCart, onAddToWishlist }) {
         <button
           onClick={() => handleFavoriteToggle(item.id)}
           className={`absolute top-3 right-3 z-10 p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
-            favorites[item.id]
+            isInWishlist(item.id)
               ? 'bg-rose-600 border-rose-500 text-white'
               : 'bg-luxury-dark/60 border-white/10 text-gray-300 hover:text-rose-500 hover:border-rose-500/50'
           }`}
           aria-label="Wishlist"
         >
-          <Heart className={`h-4 w-4 ${favorites[item.id] ? 'fill-current' : ''}`} />
+          <Heart className={`h-4 w-4 ${isInWishlist(item.id) ? 'fill-current' : ''}`} />
         </button>
         {/* Quick Add overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-luxury-dark/95 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
@@ -296,13 +297,13 @@ export default function BestSellers({ onAddToCart, onAddToWishlist }) {
       <section className="relative py-20 overflow-hidden border-b border-luxury-gold/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.06)_0%,transparent_70%)] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 text-luxury-gold border border-luxury-gold/30 px-3 py-1 rounded-full bg-luxury-gold/5 animate-fade-in-up">
-            <Flame className="h-4 w-4 animate-pulse" />
-            <span className="text-[10px] tracking-[0.2em] uppercase font-semibold">Community-Loved Scents</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold animate-fade-in-up">
+            <Flame className="h-3.5 w-3.5 animate-pulse" />
+            <span>Community-Loved Scents</span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight animate-fade-in-up">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-white tracking-wide animate-fade-in-up">
             AURA <span className="text-luxury-gold">Best Sellers</span>
           </h1>
 

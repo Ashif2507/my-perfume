@@ -372,5 +372,23 @@ export const allProductsData = [
 ];
 
 export function getProductById(id) {
+  if (id && id.startsWith('custom_')) {
+    const parts = id.split('_');
+    const name = parts[1] ? decodeURIComponent(parts[1]) : 'Bespoke Blend';
+    const type = parts[2] ? decodeURIComponent(parts[2]) : 'Custom Fragrance';
+    const price = Number(parts[3]) || 150;
+    return {
+      id,
+      name,
+      type,
+      price,
+      image: freshImg,
+      category: 'Bespoke',
+      rating: 5.0,
+      reviews: 1,
+      notes: 'Bespoke Scent Formulation',
+      desc: 'A uniquely crafted fragrance tailored to your personal olfactory preferences.'
+    };
+  }
   return allProductsData.find((p) => p.id === id);
 }

@@ -9,12 +9,15 @@ export default function TestimonialsPage() {
         <Quote className="h-64 w-64 rotate-180" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center mb-10">
-        <span className="text-luxury-gold text-sm uppercase tracking-[0.3em] font-bold mb-4 block">The Verdict</span>
-        <h1 className="font-serif text-4xl md:text-6xl font-semibold text-white tracking-wide mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center mb-10 space-y-4">
+        <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold animate-fade-in-up">
+          <Quote className="h-3.5 w-3.5" />
+          <span>The Verdict</span>
+        </div>
+        <h1 className="font-serif text-4xl md:text-6xl font-bold text-white tracking-wide animate-fade-in-up">
           Client Testimonials
         </h1>
-        <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-400 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up">
           Read what our discerning clientele has to say about their signature scents and the AURA experience.
         </p>
       </div>

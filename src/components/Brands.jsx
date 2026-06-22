@@ -1,4 +1,5 @@
 import React from 'react';
+import { Sparkles } from 'lucide-react';
 
 export default function Brands() {
   const brands = [
@@ -11,12 +12,22 @@ export default function Brands() {
   ];
 
   return (
-    <section className="py-16 bg-luxury-accent/10 border-y border-luxury-gold/5 overflow-hidden">
+    <section className="py-24 bg-luxury-accent/10 border-y border-luxury-gold/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <p className="text-center text-xs uppercase tracking-[0.3em] text-luxury-gold font-semibold mb-10">
-          Partner Fragrance Houses
-        </p>
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Trusted Maisons</span>
+          </div>
+          <h2 className="font-serif text-3xl md:text-5xl font-bold text-white tracking-wide">
+            Partner Fragrance Houses
+          </h2>
+          <p className="text-gray-400 font-light text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Sourced from the world's most renowned perfumeries and ateliers.
+          </p>
+        </div>
 
         {/* Brand Names Grid */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 items-center justify-items-center">

@@ -13,7 +13,7 @@ export default function WishlistPage() {
     return (
       <div className="min-h-screen pt-32 pb-20 px-4 text-center">
         <Heart className="h-16 w-16 mx-auto text-gray-600 mb-6" />
-        <h2 className="font-serif text-3xl text-white mb-4">Your Wishlist is Empty</h2>
+        <h2 className="font-serif text-3xl font-bold text-white tracking-wide mb-4">Your Wishlist is Empty</h2>
         <p className="text-gray-400 mb-8">Save your favorite fragrances to review later.</p>
         <Link to="/" className="btn-gold px-8 py-3 rounded-lg text-sm uppercase tracking-widest">
           Discover Fragrances
@@ -24,7 +24,13 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white mb-10">My Wishlist</h1>
+      <div className="mb-10 space-y-3 text-left">
+        <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 text-[10px] uppercase tracking-[0.25em] font-semibold">
+          <Heart className="h-3.5 w-3.5" />
+          <span>Saved Fragrances</span>
+        </div>
+        <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white tracking-wide">My Wishlist</h1>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {wishlistItems.map((id) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Percent, Gift, Award, Clock } from 'lucide-react';
+import { Percent, Gift, Award, Clock, Sparkles } from 'lucide-react';
 
 export default function OfferBanner() {
   // Set target countdown: 24 hours from current time
@@ -31,14 +31,28 @@ export default function OfferBanner() {
   const formatNumber = (num) => String(num).padStart(2, '0');
 
   return (
-    <section id="offers" className="py-20 bg-luxury-dark relative overflow-hidden">
+    <section id="offers" className="py-24 bg-luxury-dark relative overflow-hidden">
       
       {/* Background glow highlights */}
       <div className="absolute top-1/2 left-10 -translate-y-1/2 w-80 h-80 bg-luxury-gold/5 rounded-full filter blur-[80px] pointer-events-none"></div>
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-luxury-bronze/5 rounded-full filter blur-[100px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Exclusive Offers</span>
+          </div>
+          <h2 className="font-serif text-3xl md:text-5xl font-bold text-white tracking-wide">
+            Summer Solstice Special
+          </h2>
+          <p className="text-gray-400 font-light text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Unlock limited-time deals on premium fragrance collections.
+          </p>
+        </div>
+
         {/* Banner Card Container */}
         <div className="relative rounded-3xl overflow-hidden border border-luxury-gold/20 bg-gradient-to-r from-luxury-accent/80 via-luxury-card/90 to-luxury-accent/80 p-8 md:p-12 shadow-2xl glow-gold">
           
@@ -46,14 +60,8 @@ export default function OfferBanner() {
             
             {/* Promo Info */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-luxury-gold/10 border border-luxury-gold/25">
-                <Percent className="h-4 w-4 text-luxury-gold" />
-                <span className="text-xs uppercase tracking-widest font-semibold text-luxury-gold">
-                  Limited Time Exclusive
-                </span>
-              </div>
 
-              <h3 className="font-serif text-3xl md:text-5xl font-semibold text-white leading-tight">
+              <h3 className="font-serif text-2xl md:text-4xl font-semibold text-white leading-tight">
                 Summer Solstice Special
               </h3>
 

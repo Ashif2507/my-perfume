@@ -44,12 +44,15 @@ export default function CollectionsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Page Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <span className="text-luxury-gold text-sm uppercase tracking-[0.3em] font-bold mb-4 block">The Masterpiece</span>
-          <h1 className="font-serif text-4xl md:text-6xl font-semibold text-white tracking-wide mb-6">
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+          <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold animate-fade-in-up">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>The Masterpiece</span>
+          </div>
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-white tracking-wide animate-fade-in-up">
             Curated Collections
           </h1>
-          <p className="text-gray-400 text-base md:text-lg font-light leading-relaxed">
+          <p className="text-gray-400 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up">
             Immerse yourself in our distinct olfactory directories. Each collection is a testament to the art of fine perfumery, blending rare ingredients into unforgettable signatures.
           </p>
         </div>
@@ -79,7 +82,7 @@ export default function CollectionsPage() {
                 <span className="inline-block border border-luxury-gold/30 bg-luxury-gold/10 text-luxury-gold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full font-semibold">
                   {col.notes}
                 </span>
-                <h2 className="font-serif text-3xl md:text-5xl text-white font-medium">
+                <h2 className="font-serif text-3xl md:text-5xl text-white font-bold tracking-wide">
                   {col.name}
                 </h2>
                 <p className="text-gray-400 text-lg font-light leading-relaxed">

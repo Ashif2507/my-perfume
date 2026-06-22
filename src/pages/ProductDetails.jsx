@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getProductById, allProductsData } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { Star, Heart, ShoppingBag, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Star, Heart, ShoppingBag, Truck, ShieldCheck, ArrowLeft, Sparkles } from 'lucide-react';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -16,7 +16,7 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-screen pt-32 pb-20 px-4 text-center">
-        <h2 className="font-serif text-3xl text-white mb-4">Product Not Found</h2>
+        <h2 className="font-serif text-3xl font-bold text-white tracking-wide mb-4">Product Not Found</h2>
         <Link to="/" className="text-luxury-gold underline hover:text-luxury-goldlight">Return to Home</Link>
       </div>
     );
@@ -96,14 +96,14 @@ export default function ProductDetails() {
 
             {product.notes && (
               <div className="bg-luxury-accent/30 border border-white/5 rounded-xl p-4 mb-8">
-                <h4 className="text-xs uppercase tracking-widest font-bold text-white mb-2">Scent Notes</h4>
+                <h4 className="text-xs uppercase tracking-widest font-bold text-luxury-gold mb-3">Scent Notes</h4>
                 <p className="text-sm text-gray-300">{product.notes}</p>
               </div>
             )}
 
             {product.contents && (
               <div className="bg-luxury-accent/30 border border-white/5 rounded-xl p-4 mb-8">
-                <h4 className="text-xs uppercase tracking-widest font-bold text-white mb-2">Set Includes</h4>
+                <h4 className="text-xs uppercase tracking-widest font-bold text-luxury-gold mb-3">Set Includes</h4>
                 <ul className="space-y-1">
                   {product.contents.map((item, idx) => (
                     <li key={idx} className="text-sm text-gray-300">• {item}</li>
@@ -155,7 +155,18 @@ export default function ProductDetails() {
         {/* Related Products */}
         {related.length > 0 && (
           <div className="mt-32 border-t border-white/5 pt-20">
-            <h2 className="font-serif text-3xl font-semibold text-white mb-10 text-center">You May Also Like</h2>
+            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+              <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 w-max mx-auto text-[10px] uppercase tracking-[0.25em] font-semibold">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Curated For You</span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-5xl font-bold text-white tracking-wide">
+                You May Also Like
+              </h2>
+              <p className="text-gray-400 font-light text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                Explore similar fragrances from our exclusive collection.
+              </p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {related.map(item => (
                 <Link to={`/product/${item.id}`} key={item.id} className="group block rounded-2xl overflow-hidden bg-luxury-card border border-white/5 p-4 glass-card-hover">

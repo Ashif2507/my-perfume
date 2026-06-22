@@ -22,6 +22,7 @@ import TestimonialsPage from './components/TestimonialsPage';
 import ProductDetails from './pages/ProductDetails';
 import WishlistPage from './pages/WishlistPage';
 import CartPage from './pages/CartPage';
+import CustomFragrance from './pages/CustomFragrance';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -44,15 +45,12 @@ function ScrollToTop() {
 }
 
 function HomePage() {
-  const { addToCart } = useCart();
-  const { toggleWishlist } = useWishlist();
-
   return (
     <>
       <Hero />
       <Brands />
       <Categories />
-      <Products onAddToCart={addToCart} onAddToWishlist={toggleWishlist} />
+      <Products />
       <OfferBanner />
       <Reviews />
     </>
@@ -72,12 +70,21 @@ function CustomerLayout() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/new-arrivals" element={<NewArrivals onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
-          <Route path="/gift-sets" element={<GiftSets onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
-          <Route path="/best-sellers" element={<BestSellers onAddToCart={() => {}} onAddToWishlist={() => {}} />} />
+          <Route path="/new-arrivals" element={<NewArrivals />} />
+          <Route path="/gift-sets" element={<GiftSets />} />
+          <Route path="/best-sellers" element={<BestSellers />} />
           <Route path="/collection" element={<CollectionsPage />} />
           <Route path="/exclusive-offers" element={<OffersPage />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
+          <Route path="/custom-fragrance" element={<CustomFragrance />} />
+          
+          {/* Catch-all customer route */}
+          <Route path="*" element={
+            <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+              <h1 className="font-serif text-4xl text-white mb-4">Page Not Found</h1>
+              <p className="text-gray-400 mb-8">The page you are looking for does not exist.</p>
+            </div>
+          } />
         </Routes>
       </main>
       <Footer />
@@ -92,15 +99,23 @@ function App() {
       <Routes>
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          
           <Route path="products" element={<AdminProducts />} />
+          <Route path="product" element={<AdminProducts />} />
+          
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="order" element={<AdminOrders />} />
+          
           <Route path="customers" element={<AdminCustomers />} />
+          <Route path="customer" element={<AdminCustomers />} />
+          
           <Route path="reviews" element={<AdminReviews />} />
-          {/* Default admin redirect */}
+          <Route path="review" element={<AdminReviews />} />
+          
           <Route index element={<AdminDashboard />} />
+          <Route path="*" element={<AdminDashboard />} />
         </Route>
         
-        {/* Customer routes get caught here */}
         <Route path="/*" element={<CustomerLayout />} />
       </Routes>
     </>

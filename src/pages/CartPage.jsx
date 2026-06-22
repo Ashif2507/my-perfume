@@ -11,7 +11,7 @@ export default function CartPage() {
     return (
       <div className="min-h-screen pt-32 pb-20 px-4 text-center">
         <ShoppingBag className="h-16 w-16 mx-auto text-gray-600 mb-6" />
-        <h2 className="font-serif text-3xl text-white mb-4">Your Cart is Empty</h2>
+        <h2 className="font-serif text-3xl font-bold text-white tracking-wide mb-4">Your Cart is Empty</h2>
         <p className="text-gray-400 mb-8">Indulge in our exquisite collection of fragrances.</p>
         <Link to="/" className="btn-gold px-8 py-3 rounded-lg text-sm uppercase tracking-widest">
           Continue Shopping
@@ -22,7 +22,13 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white mb-10">Shopping Cart</h1>
+      <div className="mb-10 space-y-3 text-left">
+        <div className="inline-flex items-center gap-2 text-luxury-gold px-3 py-1 rounded-full border border-luxury-gold/20 bg-luxury-gold/5 text-[10px] uppercase tracking-[0.25em] font-semibold">
+          <ShoppingBag className="h-3.5 w-3.5" />
+          <span>Your Selection</span>
+        </div>
+        <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white tracking-wide">Shopping Cart</h1>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
         <div className="lg:w-2/3 space-y-6">

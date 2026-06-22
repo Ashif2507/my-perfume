@@ -7,6 +7,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [showProfile, setShowProfile] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,13 +34,20 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
     { name: 'New Arrivals', href: '/new-arrivals' },
     { name: 'Gift Sets', href: '/gift-sets' },
     { name: 'Best Sellers', href: '/best-sellers' },
+    { name: 'Custom Fragrance', href: '/custom-fragrance' },
     { name: 'Collections', href: '/collection' },
     { name: 'Exclusive Offers', href: '/exclusive-offers' },
     { name: 'Testimonials', href: '/testimonials' },
   ];
 
   const searchResults = searchQuery
-    ? allProductsData.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+    ? allProductsData.filter(p => {
+        const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             (p.notes && p.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                             (p.type && p.type.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        return matchesQuery && matchesCategory;
+      }).slice(0, 5)
     : [];
 
   return (
@@ -96,28 +104,64 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
                 <Search className="h-5 w-5" />
               </button>
 
-              {/* Search Results Dropdown */}
-              {showSearch && searchQuery && (
-                <div className="absolute top-10 right-0 w-72 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2">
-                  {searchResults.length > 0 ? (
-                    <div className="max-h-64 overflow-y-auto">
-                      {searchResults.map(result => (
-                        <Link 
-                          key={result.id} 
-                          to={`/product/${result.id}`}
-                          onClick={() => { setShowSearch(false); setSearchQuery(''); }}
-                          className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5"
-                        >
-                          <img src={result.image} alt="" className="w-10 h-10 rounded object-cover bg-luxury-accent" />
-                          <div>
-                            <p className="text-sm text-white font-medium">{result.name}</p>
-                            <p className="text-[10px] text-gray-400">{result.category} • ${result.price}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+              {/* Search Results & Category Dropdown */}
+              {showSearch && (
+                <div className="absolute top-10 right-0 w-80 bg-luxury-card border border-luxury-gold/20 rounded-xl shadow-2xl overflow-hidden mt-2 z-50">
+                  {/* Category Filter Chips */}
+                  <div className="flex gap-1.5 p-3 border-b border-white/5 overflow-x-auto scrollbar-none bg-luxury-accent/30">
+                    {['All', 'Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full transition-all border whitespace-nowrap cursor-pointer ${
+                          selectedCategory === cat
+                            ? 'bg-luxury-gold text-luxury-dark border-luxury-gold font-bold'
+                            : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:border-white/20'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  {searchQuery ? (
+                    searchResults.length > 0 ? (
+                      <div className="max-h-64 overflow-y-auto">
+                        {searchResults.map(result => (
+                          <Link 
+                            key={result.id} 
+                            to={`/product/${result.id}`}
+                            onClick={() => { setShowSearch(false); setSearchQuery(''); setSelectedCategory('All'); }}
+                            className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
+                          >
+                            <img src={result.image} alt="" className="w-10 h-10 rounded object-cover bg-luxury-accent" />
+                            <div>
+                              <p className="text-sm text-white font-medium">{result.name}</p>
+                              <p className="text-[10px] text-gray-400">{result.category} • ${result.price}</p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
+                    )
                   ) : (
-                    <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
+                    <div className="p-4 text-left">
+                      <p className="text-[10px] uppercase tracking-widest text-luxury-gold font-semibold mb-2">Popular Collections</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => { setSelectedCategory(cat); setSearchQuery(cat); }}
+                            className="text-left text-xs text-gray-300 hover:text-luxury-gold transition-colors py-1.5 px-2.5 bg-white/5 rounded border border-white/5 cursor-pointer"
+                          >
+                            ✨ {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -212,14 +256,45 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
               className="w-full bg-luxury-accent border border-luxury-gold/20 rounded-full py-2 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-luxury-gold"
             />
             <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+            {/* Mobile Category Filters */}
+            <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-none py-1.5">
+              {['All', 'Floral', 'Oriental', 'Woody', 'Fresh'].map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1 text-[10px] uppercase tracking-wider rounded-full transition-all border whitespace-nowrap cursor-pointer ${
+                    selectedCategory === cat
+                      ? 'bg-luxury-gold text-luxury-dark border-luxury-gold font-bold'
+                      : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
             {/* Mobile Search Results */}
-            {searchQuery && searchResults.length > 0 && (
-              <div className="mt-2 bg-luxury-card rounded-lg overflow-hidden border border-white/5">
-                {searchResults.map(res => (
-                  <Link key={res.id} to={`/product/${res.id}`} className="block p-3 border-b border-white/5 text-sm text-white">
-                    {res.name}
-                  </Link>
-                ))}
+            {searchQuery && (
+              <div className="mt-2 bg-luxury-card rounded-lg overflow-hidden border border-white/5 max-h-60 overflow-y-auto">
+                {searchResults.length > 0 ? (
+                  searchResults.map(res => (
+                    <Link 
+                      key={res.id} 
+                      to={`/product/${res.id}`}
+                      onClick={() => { setIsOpen(false); setSearchQuery(''); setSelectedCategory('All'); }}
+                      className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors border-b border-white/5 text-sm text-white"
+                    >
+                      <img src={res.image} alt="" className="w-8 h-8 rounded object-cover bg-luxury-accent" />
+                      <div>
+                        <p className="font-medium text-white">{res.name}</p>
+                        <p className="text-[10px] text-gray-400">{res.category} • ${res.price}</p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-sm text-gray-400">No fragrances found.</div>
+                )}
               </div>
             )}
           </div>

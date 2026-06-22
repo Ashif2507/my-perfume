@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ShoppingBag, Heart, Search, User, Menu, X, Sparkles, LogOut, Package, UserCircle } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { allProductsData } from '../data/products';
 
 export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [showProfile, setShowProfile] = useState(false);
-  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const location = useLocation();
 
   const searchRef = useRef(null);
@@ -27,6 +26,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
   }, [location.pathname]);
 

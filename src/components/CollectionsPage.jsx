@@ -1,4 +1,4 @@
-import React from 'react';
+import { Sparkles } from 'lucide-react';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';

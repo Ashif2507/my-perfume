@@ -1,5 +1,4 @@
-import React from 'react';
-import { Star, ShieldCheck, Quote } from 'lucide-react';
+import { Star, ShieldCheck, Quote, Award } from 'lucide-react';
 
 export default function Reviews() {
   const reviews = [

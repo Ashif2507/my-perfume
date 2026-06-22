@@ -1,4 +1,4 @@
-import React from 'react';
+import { Sparkles } from 'lucide-react';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -60,7 +60,7 @@ export default function Categories() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((cat, idx) => (
+          {categories.map(cat => (
             <div 
               key={cat.name}
               className="group relative rounded-2xl overflow-hidden border border-white/5 bg-luxury-card/50 glass-card-hover flex flex-col justify-between"

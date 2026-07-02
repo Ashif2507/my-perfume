@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ArrowRight, Sparkles } from 'lucide-react';
 import heroPerfume from '../assets/images/hero_perfume.png';
 

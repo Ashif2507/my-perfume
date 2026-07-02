@@ -1,5 +1,4 @@
-import React from 'react';
-import { Sparkles, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 
 // Custom Brand SVGs since Lucide v1.x removed brand icons
 const InstagramIcon = (props) => (

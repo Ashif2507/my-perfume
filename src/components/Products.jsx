@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Star, Heart, ShoppingCart, Sparkles, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -111,6 +112,23 @@ export default function Products() {
     ]
   };
 
+  // Convert productsData into a flat array for the fallback
+  const fallbackArray = [
+    ...productsData.bestsellers.map(p => ({ ...p, _group: 'bestsellers' })),
+    ...productsData.arrivals.map(p => ({ ...p, _group: 'arrivals' })),
+    ...productsData.trending.map(p => ({ ...p, _group: 'trending' }))
+  ];
+
+  const { data: fetchedProducts } = useSupabaseData('products', fallbackArray);
+
+  // Group fetched products (if they came from supabase, we might need a way to group them.
+  // For fallback, we added `_group` property.
+  const displayData = {
+    bestsellers: fetchedProducts.filter(p => p._group === 'bestsellers' || ['p1', 'p2', 'p3', 'p4'].includes(p.id)),
+    arrivals: fetchedProducts.filter(p => p._group === 'arrivals' || ['p5', 'p6'].includes(p.id)),
+    trending: fetchedProducts.filter(p => p._group === 'trending' || ['p7', 'p8'].includes(p.id))
+  };
+
   const handleFavoriteToggle = (productId) => {
     toggleWishlist(productId);
   };
@@ -165,7 +183,7 @@ export default function Products() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {productsData[activeTab].map((product) => (
+          {(displayData[activeTab] || []).map((product) => (
             <div 
               key={product.id}
               className="group relative rounded-2xl overflow-hidden bg-luxury-card border border-white/5 flex flex-col justify-between p-4 glass-card-hover"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Filter, Star, CheckCircle, XCircle, Trash2, Check } from 'lucide-react';
 
 const initialReviews = [

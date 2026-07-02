@@ -194,9 +194,9 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
                   <button onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                     <UserCircle className="h-4 w-4" /> My Profile
                   </button>
-                  <button onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/order-history" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                     <Package className="h-4 w-4" /> Order History
-                  </button>
+                  </Link>
                   <Link to="/admin" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-luxury-gold hover:bg-white/5 transition-colors">
                     <LogOut className="h-4 w-4" /> Admin Panel
                   </Link>

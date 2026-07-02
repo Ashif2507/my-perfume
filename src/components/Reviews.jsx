@@ -1,4 +1,5 @@
 import { Star, ShieldCheck, Quote, Award } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 
 export default function Reviews() {
   const reviews = [
@@ -31,6 +32,8 @@ export default function Reviews() {
     }
   ];
 
+  const { data: fetchedReviews } = useSupabaseData('reviews', reviews);
+
   return (
     <section id="reviews" className="py-24 bg-luxury-dark border-t border-luxury-gold/5 relative overflow-hidden">
       
@@ -57,7 +60,7 @@ export default function Reviews() {
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review) => (
+          {fetchedReviews.map((review) => (
             <div 
               key={review.id}
               className="group relative rounded-2xl p-8 bg-luxury-card border border-white/5 flex flex-col justify-between glass-card-hover"

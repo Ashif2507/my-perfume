@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById, allProductsData } from '../data/products';
 import { useCart } from '../context/CartContext';

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Percent, Gift, Award, Clock, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Gift, Award, Clock, Sparkles } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 
 export default function OfferBanner() {
   // Set target countdown: 24 hours from current time
@@ -29,6 +30,18 @@ export default function OfferBanner() {
   }, []);
 
   const formatNumber = (num) => String(num).padStart(2, '0');
+
+  const fallbackOffers = [
+    {
+      title: "Summer Solstice Special",
+      description: "Elevate your fragrance collection. Take an extra 20% off all signature collections. Use code",
+      discount_code: "AURA20",
+      is_active: true
+    }
+  ];
+
+  const { data: fetchedOffers } = useSupabaseData('offers', fallbackOffers);
+  const currentOffer = fetchedOffers.find(o => o.is_active) || fallbackOffers[0];
 
   return (
     <section id="offers" className="py-24 bg-luxury-dark relative overflow-hidden">
@@ -62,11 +75,11 @@ export default function OfferBanner() {
             <div className="lg:col-span-7 space-y-6 text-left">
 
               <h3 className="font-serif text-2xl md:text-4xl font-semibold text-white leading-tight">
-                Summer Solstice Special
+                {currentOffer.title}
               </h3>
 
               <p className="text-gray-300 text-sm md:text-base font-light leading-relaxed max-w-xl">
-                Elevate your fragrance collection. Take an extra <strong className="text-luxury-gold">20% off</strong> all signature collections. Use code <span className="font-mono bg-luxury-accent px-2 py-1 rounded border border-white/10 text-white font-bold">AURA20</span> at checkout.
+                {currentOffer.description} <strong className="text-luxury-gold">20% off</strong> all signature collections. Use code <span className="font-mono bg-luxury-accent px-2 py-1 rounded border border-white/10 text-white font-bold">{currentOffer.discount_code}</span> at checkout.
               </p>
 
               {/* Perks Highlights */}

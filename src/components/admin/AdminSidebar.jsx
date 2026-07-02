@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Star, LogOut, Sparkles } from 'lucide-react';
 

@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { supabase } from './supabaseClient';
 
 // Layouts
 import Navbar from './components/Navbar';
@@ -22,6 +23,8 @@ import TestimonialsPage from './components/TestimonialsPage';
 import ProductDetails from './pages/ProductDetails';
 import WishlistPage from './pages/WishlistPage';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 import CustomFragrance from './pages/CustomFragrance';
 
 // Admin Pages
@@ -70,6 +73,8 @@ function CustomerLayout() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-history" element={<OrderHistoryPage />} />
           <Route path="/new-arrivals" element={<NewArrivals />} />
           <Route path="/gift-sets" element={<GiftSets />} />
           <Route path="/best-sellers" element={<BestSellers />} />
@@ -93,6 +98,36 @@ function CustomerLayout() {
 }
 
 function App() {
+  useEffect(() => {
+    const fetchAllTables = async () => {
+      const tables = [
+        'collections', 'testimonials', 'custom_fragrance_notes', 
+        'custom_fragrances', 'reviews', 'order_items', 'orders', 
+        'wishlist_items', 'wishlists', 'cart_items', 'carts', 
+        'addresses', 'customers', 'offers', 'brands', 'categories', 'products'
+      ];
+      
+      console.log('Fetching Supabase tables to populate browser console...');
+      
+      const results = {};
+      
+      await Promise.all(tables.map(async (table) => {
+        try {
+          const { data, error } = await supabase.from(table).select('*').limit(1);
+          if (error) throw error;
+          results[table] = data;
+          console.log(`Successfully fetched from ${table}`);
+        } catch (err) {
+          console.warn(`Could not fetch from ${table}:`, err.message);
+        }
+      }));
+      
+      console.log('Supabase Fetches Complete:', results);
+    };
+    
+    fetchAllTables();
+  }, []);
+
   return (
     <>
       <ScrollToTop />

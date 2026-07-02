@@ -1,5 +1,6 @@
-import React from 'react';
+
 import { Sparkles } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 
 export default function Brands() {
   const brands = [
@@ -10,6 +11,8 @@ export default function Brands() {
     { name: 'BYREDO', desc: 'Stockholm' },
     { name: 'JO MALONE', desc: 'London' }
   ];
+
+  const { data: fetchedBrands } = useSupabaseData('brands', brands);
 
   return (
     <section className="py-24 bg-luxury-accent/10 border-y border-luxury-gold/5 overflow-hidden">
@@ -31,7 +34,7 @@ export default function Brands() {
 
         {/* Brand Names Grid */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 items-center justify-items-center">
-          {brands.map((brand) => (
+          {fetchedBrands.map((brand) => (
             <div 
               key={brand.name} 
               className="text-center group cursor-pointer transition-all duration-300 transform hover:scale-105"

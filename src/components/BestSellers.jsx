@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Sparkles, Star, Heart, ShoppingCart, Check, ShieldCheck, TrendingUp, Award, Users, Filter, Search, Flame } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, Star, Heart, ShoppingCart, Check, ShieldCheck, TrendingUp, Award, Users, Search, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -178,6 +179,8 @@ export default function BestSellers() {
 
   const allProducts = [...topRated, ...mostPopular, ...customerFavorites];
 
+  const { data: fetchedProducts } = useSupabaseData('products', allProducts);
+
   const handleFavoriteToggle = (id) => {
     toggleWishlist(id);
   };
@@ -188,13 +191,18 @@ export default function BestSellers() {
     setTimeout(() => setAddedItems(prev => ({ ...prev, [id]: false })), 2000);
   };
 
-  const filteredProducts = allProducts.filter(item => {
+  const filteredProducts = fetchedProducts.filter(item => {
     const matchSection = activeSection === 'All' || item.section === activeSection;
     const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase())
       || item.notes.toLowerCase().includes(searchQuery.toLowerCase())
       || item.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchSection && matchSearch;
   });
+
+  // Group fetched products by section
+  const displayTopRated = filteredProducts.filter(p => p.section === 'Top Rated' || ['tr1', 'tr2', 'tr3', 'tr4'].includes(p.id));
+  const displayMostPopular = filteredProducts.filter(p => p.section === 'Most Popular' || ['mp1', 'mp2', 'mp3'].includes(p.id));
+  const displayCustomerFavorites = filteredProducts.filter(p => p.section === 'Customer Favorites' || ['cf1', 'cf2', 'cf3'].includes(p.id));
 
   // Helper to render a product card (shared across all sections)
   const ProductCard = ({ item }) => (
@@ -390,8 +398,7 @@ export default function BestSellers() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {topRated
-                    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.notes.toLowerCase().includes(searchQuery.toLowerCase()) || searchQuery === '')
+                  {displayTopRated
                     .map(item => <ProductCard key={item.id} item={item} />)}
                 </div>
               </section>
@@ -413,8 +420,7 @@ export default function BestSellers() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {mostPopular
-                    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.notes.toLowerCase().includes(searchQuery.toLowerCase()) || searchQuery === '')
+                  {displayMostPopular
                     .map(item => <ProductCard key={item.id} item={item} />)}
                 </div>
               </section>
@@ -436,8 +442,7 @@ export default function BestSellers() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {customerFavorites
-                    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.notes.toLowerCase().includes(searchQuery.toLowerCase()) || searchQuery === '')
+                  {displayCustomerFavorites
                     .map(item => <ProductCard key={item.id} item={item} />)}
                 </div>
               </section>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
@@ -96,10 +95,10 @@ export default function CartPage() {
               </div>
             </div>
             
-            <button className="btn-gold w-full mt-8 flex justify-center items-center gap-2 py-3.5 rounded-lg text-sm uppercase tracking-widest">
+            <Link to="/checkout" className="btn-gold w-full mt-8 flex justify-center items-center gap-2 py-3.5 rounded-lg text-sm uppercase tracking-widest">
               Proceed to Checkout
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
             <p className="text-[10px] text-gray-500 text-center mt-4 uppercase tracking-widest">
               Secure 256-bit SSL Encryption
             </p>

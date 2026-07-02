@@ -1,6 +1,6 @@
-import React from 'react';
-import Reviews from './Reviews';
 import { Quote } from 'lucide-react';
+import Reviews from './Reviews';
+
 
 export default function TestimonialsPage() {
   return (

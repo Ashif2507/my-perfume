@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Star, Heart, ShoppingCart, Sparkles, Check, Gift, ArrowRight, ShieldCheck, Search, Filter } from 'lucide-react';
+import { useState } from 'react';
+import { Star, Heart, ShoppingCart, Sparkles, Check, Gift, ArrowRight, ShieldCheck, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -143,8 +144,19 @@ export default function NewArrivals() {
     }, 2000);
   };
 
+  const allNewArrivalsFallback = [...trendingPerfumes, ...latestCollections, ...limitedEditions];
+  const { data: fetchedProducts } = useSupabaseData('products', allNewArrivalsFallback);
+
+  const displayTrending = fetchedProducts.filter(p => 
+    ['t1', 't2', 't3', 't4', 'p9', 'p10', 'p11', 'p12'].includes(p.id) || 
+    ['Trending Scent', 'Most Popular', 'Editor Choice', 'New Release'].includes(p.tag) || 
+    ['Trending Scent', 'Editor Choice', '❤ Most Gifted', '❤ Most Reviewed'].includes(p.badge)
+  );
+  const displayCollections = fetchedProducts.filter(p => ['c1', 'c2', 'c3'].includes(p.id) || p.badge === 'Signature Box' || p.badge === 'Limited Run' || p.badge === 'Best Value');
+  const displayLimited = fetchedProducts.filter(p => ['le1', 'le2'].includes(p.id) || p.type === 'Grand Extrait' || p.type === 'Concentrated Nectar');
+
   // Filtering logic
-  const filteredTrending = trendingPerfumes.filter(item => {
+  const filteredTrending = displayTrending.filter(item => {
     const matchesFamily = filterFamily === 'All' || item.family === filterFamily;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.notes.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -242,9 +254,11 @@ export default function NewArrivals() {
                   </Link>
 
                   {/* Badge */}
-                  <span className={`absolute top-3 left-3 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${product.badgeColor}`}>
-                    {product.tag}
-                  </span>
+                  {(product.tag || product.badge) && (
+                    <span className={`absolute top-3 left-3 z-10 text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md font-bold shadow-md ${product.badgeColor || 'bg-luxury-gold text-luxury-dark'}`}>
+                      {product.tag || product.badge}
+                    </span>
+                  )}
 
                   {/* Wishlist Button */}
                   <button 
@@ -372,7 +386,7 @@ export default function NewArrivals() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {latestCollections.map((collection) => (
+            {displayCollections.map((collection) => (
               <div 
                 key={collection.id}
                 className="group flex flex-col justify-between rounded-2xl bg-luxury-card border border-white/5 overflow-hidden transition-all duration-300 hover:border-luxury-gold/25"
@@ -473,7 +487,7 @@ export default function NewArrivals() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {limitedEditions.map((edition) => (
+          {displayLimited.map((edition) => (
             <div 
               key={edition.id}
               className="group relative rounded-3xl p-1 bg-gradient-to-br from-luxury-gold/20 via-transparent to-white/5 transition-all duration-500 hover:from-luxury-gold/50"

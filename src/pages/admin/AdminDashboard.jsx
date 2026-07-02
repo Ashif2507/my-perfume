@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { TrendingUp, Users, ShoppingBag, DollarSign } from 'lucide-react';
 
 export default function AdminDashboard() {

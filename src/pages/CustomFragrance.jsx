@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { standardProducts, giftSetsData } from '../data/products';
 import { Link } from 'react-router-dom';
 import { Sparkles, Gift, Star, Heart, ShoppingBag, Check, ShieldCheck, HelpCircle, ChevronDown, ChevronUp, MessageSquare, Award, Flame } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../supabaseClient';
 
 export default function CustomFragrance() {
   const { addToCart } = useCart();
@@ -67,16 +68,28 @@ export default function CustomFragrance() {
   const totalPrice = unitPrice * quantity;
 
   // Add customized item to cart
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     setIsAdding(true);
     
-    // Format a dynamic ID that encodes the custom specifications
-    // ID format: custom_[Name]_[Type]_[Price]_[Timestamp]
     const customName = `Bespoke ${brand} ${collection}`;
     const customType = `${scentFamily} Blend`;
-    
-    // We encode the custom configurations inside the ID split structure
     const customId = `custom_${encodeURIComponent(customName)}_${encodeURIComponent(customType)}_${unitPrice}_${Date.now()}`;
+    
+    try {
+      const sid = localStorage.getItem('aura_session_id') || 'session_fallback';
+      await supabase.from('custom_fragrances').insert({
+        id: customId,
+        session_id: sid,
+        name: customName,
+        base_note: scentFamily,
+        heart_note: selectedNotes.join(', '),
+        top_note: brand,
+        intensity: collection,
+        price: unitPrice
+      });
+    } catch (e) {
+      console.error('Failed to save to Supabase', e);
+    }
     
     addToCart(customId, quantity);
     

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Filter, Mail, Phone, ShieldCheck, Ban, Edit2, Trash2, X, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

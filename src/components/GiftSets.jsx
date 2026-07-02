@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Sparkles, Gift, Star, Heart, ShoppingCart, Check, ShieldCheck, Search, Info } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, Gift, Star, Heart, ShoppingCart, Check, ShieldCheck, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
@@ -121,8 +122,11 @@ export default function GiftSets() {
     }, 2000);
   };
 
+  const { data: fetchedProducts } = useSupabaseData('products', giftSetsData);
+  const displayGiftSets = fetchedProducts.filter(p => ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].includes(p.id) || (p.contents && p.contents.length > 0));
+
   // Filter logic
-  const filteredSets = giftSetsData.filter(set => {
+  const filteredSets = displayGiftSets.filter(set => {
     const matchesCategory = activeCategory === 'All' || set.category === activeCategory;
     const matchesSearch = set.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           set.notes.toLowerCase().includes(searchQuery.toLowerCase()) ||

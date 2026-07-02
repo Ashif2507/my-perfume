@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { allProductsData } from '../../data/products';
 import { Plus, Edit2, Trash2, Search, Filter, X, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useSupabaseData } from '../../hooks/useSupabaseData';
+import { supabase } from '../../supabaseClient';
 
 import floralImg from '../../assets/images/perfume_floral.png';
 import woodyImg from '../../assets/images/perfume_woody.png';
@@ -16,7 +18,14 @@ const categoryImages = {
 };
 
 export default function AdminProducts() {
+  const { data: fetchedProducts } = useSupabaseData('products', allProductsData);
   const [products, setProducts] = useState(allProductsData);
+  
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProducts(fetchedProducts);
+  }, [fetchedProducts]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
   
@@ -74,64 +83,67 @@ export default function AdminProducts() {
   };
 
   // Save/Update handler
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       toast.error('Product name is required');
       return;
     }
 
-    if (editingProduct) {
-      // Edit mode
-      setProducts(prev => prev.map(p => {
-        if (p.id === editingProduct.id) {
-          return {
-            ...p,
-            name: formData.name,
-            type: formData.type,
-            price: Number(formData.price),
-            category: formData.category,
-            notes: formData.notes,
-            desc: formData.desc,
-            image: categoryImages[formData.category] || p.image
-          };
-        }
-        return p;
-      }));
-      toast.success('Product updated successfully', {
-        style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' }
-      });
-    } else {
-      // Add mode
-      const newProduct = {
-        id: `p-${Date.now()}`,
-        name: formData.name,
-        type: formData.type,
-        price: Number(formData.price),
-        category: formData.category,
-        notes: formData.notes,
-        desc: formData.desc,
-        rating: 5.0,
-        reviews: 0,
-        image: categoryImages[formData.category] || floralImg,
-        badge: 'New',
-        badgeColor: 'bg-emerald-500 text-luxury-dark'
-      };
-      setProducts(prev => [newProduct, ...prev]);
-      toast.success('Product added successfully', {
-        style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' }
-      });
+    try {
+      if (editingProduct) {
+        // Edit mode
+        const updatedObj = {
+          name: formData.name,
+          type: formData.type,
+          price: Number(formData.price),
+          category: formData.category,
+          notes: formData.notes,
+          desc: formData.desc,
+          image: categoryImages[formData.category] || editingProduct.image
+        };
+        await supabase.from('products').update(updatedObj).eq('id', editingProduct.id);
+        
+        setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...updatedObj } : p));
+        toast.success('Product updated successfully', { style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' } });
+      } else {
+        // Add mode
+        const newProduct = {
+          id: `p-${Date.now()}`,
+          name: formData.name,
+          type: formData.type,
+          price: Number(formData.price),
+          category: formData.category,
+          notes: formData.notes,
+          description: formData.desc,
+          rating: 5.0,
+          reviews: 0,
+          image: categoryImages[formData.category] || floralImg,
+          badge: 'New',
+          badgecolor: 'bg-emerald-500 text-luxury-dark'
+        };
+        await supabase.from('products').insert([newProduct]);
+        setProducts(prev => [newProduct, ...prev]);
+        toast.success('Product added successfully', { style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' } });
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      toast.error('Failed to save product');
     }
-    setIsModalOpen(false);
   };
 
   // Delete handler
-  const handleDelete = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    setDeleteConfirmId(null);
-    toast.error('Product deleted from database', {
-      style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' }
-    });
+  const handleDelete = async (id) => {
+    try {
+      await supabase.from('products').delete().eq('id', id);
+      setProducts(prev => prev.filter(p => p.id !== id));
+      setDeleteConfirmId(null);
+      toast.error('Product deleted from database', { style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' } });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import OfferBanner from './OfferBanner';
 import { Gift, Sparkles, Star } from 'lucide-react';
 

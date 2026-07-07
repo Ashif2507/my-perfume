@@ -92,44 +92,55 @@ export default function AdminProducts() {
 
     try {
       if (editingProduct) {
-        // Edit mode
+        // Edit mode — never overwrite the existing image
         const updatedObj = {
-          name: formData.name,
-          type: formData.type,
-          price: Number(formData.price),
-          category: formData.category,
-          notes: formData.notes,
-          desc: formData.desc,
-          image: categoryImages[formData.category] || editingProduct.image
+          name:        formData.name,
+          type:        formData.type,
+          price:       Number(formData.price),
+          category:    formData.category,
+          notes:       formData.notes,
+          description: formData.desc,
         };
-        await supabase.from('products').update(updatedObj).eq('id', editingProduct.id);
-        
-        setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...updatedObj } : p));
-        toast.success('Product updated successfully', { style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' } });
+        const { error } = await supabase
+          .from('products')
+          .update(updatedObj)
+          .eq('id', editingProduct.id);
+        if (error) throw error;
+
+        setProducts(prev =>
+          prev.map(p => p.id === editingProduct.id ? { ...p, ...updatedObj } : p)
+        );
+        toast.success('Product updated successfully', {
+          style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' }
+        });
       } else {
         // Add mode
+        const { data: { user } } = await supabase.auth.getUser();
         const newProduct = {
-          id: `p-${Date.now()}`,
-          name: formData.name,
-          type: formData.type,
-          price: Number(formData.price),
-          category: formData.category,
-          notes: formData.notes,
+          id:          `p-${Date.now()}`,
+          user_id:     user?.id || null,
+          name:        formData.name,
+          type:        formData.type,
+          price:       Number(formData.price),
+          category:    formData.category,
+          notes:       formData.notes,
           description: formData.desc,
-          rating: 5.0,
-          reviews: 0,
-          image: categoryImages[formData.category] || floralImg,
-          badge: 'New',
-          badgecolor: 'bg-emerald-500 text-luxury-dark'
+          rating:      5.0,
+          reviews:     0,
+          badge:       'New',
+          badge_color: 'bg-emerald-500 text-luxury-dark',
         };
-        await supabase.from('products').insert([newProduct]);
+        const { error } = await supabase.from('products').insert([newProduct]);
+        if (error) throw error;
         setProducts(prev => [newProduct, ...prev]);
-        toast.success('Product added successfully', { style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' } });
+        toast.success('Product added successfully', {
+          style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' }
+        });
       }
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error('Failed to save product');
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -190,77 +201,77 @@ export default function AdminProducts() {
         </div>
       </div>
 
-      {/* Catalog Table */}
-      <div className="bg-luxury-card border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-300 whitespace-nowrap">
-            <thead className="bg-luxury-accent/50 text-xs uppercase tracking-widest text-gray-400 border-b border-white/5">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Product</th>
-                <th className="px-6 py-4 font-semibold">Category</th>
-                <th className="px-6 py-4 font-semibold">Price</th>
-                <th className="px-6 py-4 font-semibold">Notes</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded bg-luxury-accent overflow-hidden flex items-center justify-center p-1 border border-white/5">
-                          <img src={product.image} alt="" className="w-full h-full object-cover rounded" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{product.name}</p>
-                          <p className="text-[10px] text-gray-500 uppercase tracking-wider">{product.type}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 text-xs rounded bg-white/5 border border-white/10 text-gray-300">
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-serif font-semibold text-white">${product.price}.00</td>
-                    <td className="px-6 py-4 text-xs text-gray-400 max-w-xs truncate">{product.notes || '—'}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-bold">
-                        Active
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => openEditModal(product)}
-                          className="p-1.5 text-gray-400 hover:text-white bg-white/5 rounded transition-colors"
-                          title="Edit Product"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => setDeleteConfirmId(product.id)}
-                          className="p-1.5 text-gray-400 hover:text-rose-500 bg-white/5 rounded transition-colors"
-                          title="Delete Product"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                    No products found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Catalog — Column header */}
+      <div className="hidden lg:grid grid-cols-[2fr_1fr_0.8fr_2fr_0.8fr_1fr] gap-4 items-center px-5 py-2 text-[10px] uppercase tracking-widest text-gray-500 font-semibold border-b border-white/5">
+        <span>Product</span>
+        <span>Category</span>
+        <span>Price</span>
+        <span>Notes</span>
+        <span>Status</span>
+        <span className="text-center">Actions</span>
+      </div>
+
+      {/* Catalog — rows */}
+      <div className="space-y-2">
+        {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+          <div key={product.id} className="bg-luxury-card border border-white/5 rounded-2xl px-5 py-4 hover:border-luxury-gold/20 transition-all group">
+
+            {/* Desktop layout */}
+            <div className="hidden lg:grid grid-cols-[2fr_1fr_0.8fr_2fr_0.8fr_1fr] gap-4 items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-luxury-accent overflow-hidden border border-white/5 shrink-0">
+                  <img src={product.image || categoryImages[product.category] || floralImg} alt={product.name} className="w-full h-full object-cover" onError={e => { e.target.src = categoryImages[product.category] || floralImg; }} />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">{product.name}</p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">{product.type}</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 text-xs rounded-lg bg-white/5 border border-white/10 text-gray-300 w-max">{product.category}</span>
+              <span className="font-serif font-semibold text-white text-sm">${product.price}.00</span>
+              <span className="text-xs text-gray-400 truncate">{product.notes || '—'}</span>
+              <span className="px-2.5 py-1 text-[10px] rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-bold w-max">Active</span>
+              <div className="flex items-center justify-center gap-2">
+                <button onClick={() => openEditModal(product)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 hover:bg-luxury-gold/20 rounded-lg transition-all whitespace-nowrap">
+                  <Edit2 className="h-3 w-3 shrink-0" /> Edit
+                </button>
+                <button onClick={() => setDeleteConfirmId(product.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 rounded-lg transition-all whitespace-nowrap">
+                  <Trash2 className="h-3 w-3 shrink-0" /> Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile / tablet layout */}
+            <div className="flex lg:hidden items-start gap-3">
+              <div className="w-14 h-14 rounded-xl bg-luxury-accent overflow-hidden border border-white/5 shrink-0">
+                <img src={product.image || categoryImages[product.category] || floralImg} alt={product.name} className="w-full h-full object-cover" onError={e => { e.target.src = categoryImages[product.category] || floralImg; }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-white text-sm">{product.name}</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{product.type}</p>
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <span className="text-luxury-gold font-serif font-semibold">${product.price}.00</span>
+                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">{product.category}</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase font-bold text-[10px]">Active</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 truncate">{product.notes || '—'}</p>
+              </div>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button onClick={() => openEditModal(product)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 rounded-lg whitespace-nowrap">
+                  <Edit2 className="h-3 w-3" /> Edit
+                </button>
+                <button onClick={() => setDeleteConfirmId(product.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg whitespace-nowrap">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )) : (
+          <div className="bg-luxury-card border border-white/5 rounded-2xl px-6 py-12 text-center text-gray-500">
+            No products found.
+          </div>
+        )}
       </div>
 
       {/* Add/Edit Modal */}

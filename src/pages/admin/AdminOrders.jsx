@@ -22,7 +22,7 @@ export default function AdminOrders() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select('*, customers(*)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -48,9 +48,9 @@ export default function AdminOrders() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const id = (order.id || '').toLowerCase();
-    const name = (order.customer_name || '').toLowerCase();
-    const email = (order.customer_email || '').toLowerCase();
+    const id = (order.order_number || order.id || '').toLowerCase();
+    const name = (order.customers?.name || '').toLowerCase();
+    const email = (order.customers?.email || '').toLowerCase();
     const term = searchTerm.toLowerCase();
     const matchesSearch = id.includes(term) || name.includes(term) || email.includes(term);
     const matchesStatus = filterStatus === 'All' || order.status === filterStatus;
@@ -157,81 +157,86 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-luxury-card border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-300 whitespace-nowrap">
-            <thead className="bg-luxury-accent/50 text-xs uppercase tracking-widest text-gray-400 border-b border-white/5">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Order ID</th>
-                <th className="px-6 py-4 font-semibold">Customer</th>
-                <th className="px-6 py-4 font-semibold">Email</th>
-                <th className="px-6 py-4 font-semibold">Date</th>
-                <th className="px-6 py-4 font-semibold">Total</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center gap-3 text-gray-500">
-                      <RefreshCw className="h-8 w-8 animate-spin text-luxury-gold" />
-                      <p className="text-sm">Loading orders from Supabase...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4 font-medium text-luxury-gold text-xs tracking-wider">
-                      {order.id?.slice(0, 8).toUpperCase()}
-                    </td>
-                    <td className="px-6 py-4 text-white font-medium">{order.customer_name || '—'}</td>
-                    <td className="px-6 py-4 text-gray-400 text-xs">{order.customer_email || '—'}</td>
-                    <td className="px-6 py-4 text-gray-400">{formatDate(order.created_at)}</td>
-                    <td className="px-6 py-4 font-serif font-semibold text-white">
-                      ${Number(order.total_amount || 0).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4">{getStatusBadge(order.status)}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => openEditModal(order)}
-                          className="p-1.5 text-gray-400 hover:text-white bg-white/5 rounded transition-colors"
-                          title="Update Status"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(order.id)}
-                          className="p-1.5 text-gray-400 hover:text-rose-500 bg-white/5 rounded transition-colors"
-                          title="Delete Order"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center gap-3 text-gray-500">
-                      <Search className="h-8 w-8" />
-                      <p className="text-sm">
-                        {orders.length === 0
-                          ? 'No orders in Supabase yet. Place an order from the storefront!'
-                          : 'No orders match your search.'}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Column headers */}
+      <div className="hidden lg:grid grid-cols-[1fr_1.2fr_1.5fr_1fr_0.8fr_1fr_auto] gap-4 items-center px-5 py-2 text-[10px] uppercase tracking-widest text-gray-500 font-semibold border-b border-white/5">
+        <span>Order ID</span>
+        <span>Customer</span>
+        <span>Email</span>
+        <span>Date</span>
+        <span>Total</span>
+        <span>Status</span>
+        <span className="text-center w-40">Actions</span>
+      </div>
+
+      {/* Rows */}
+      <div className="space-y-2">
+        {loading ? (
+          <div className="bg-luxury-card border border-white/5 rounded-2xl px-6 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 text-gray-500">
+              <RefreshCw className="h-8 w-8 animate-spin text-luxury-gold" />
+              <p className="text-sm">Loading orders from Supabase...</p>
+            </div>
+          </div>
+        ) : filteredOrders.length > 0 ? filteredOrders.map((order) => (
+          <div key={order.id} className="bg-luxury-card border border-white/5 rounded-2xl px-5 py-4 hover:border-luxury-gold/20 transition-all group">
+
+            {/* Desktop */}
+            <div className="hidden lg:grid grid-cols-[1fr_1.2fr_1.5fr_1fr_0.8fr_1fr_auto] gap-4 items-center">
+              <span className="font-mono text-luxury-gold text-xs tracking-wider">{order.order_number || order.id?.slice(0,8).toUpperCase()}</span>
+              <span className="text-white font-medium text-sm truncate">{order.customers?.name || '—'}</span>
+              <span className="text-gray-400 text-xs truncate">{order.customers?.email || '—'}</span>
+              <span className="text-gray-400 text-sm">{formatDate(order.created_at)}</span>
+              <span className="font-serif font-semibold text-white">${Number(order.total || 0).toFixed(2)}</span>
+              <span>{getStatusBadge(order.status)}</span>
+              <div className="flex items-center gap-2 w-40">
+                <button
+                  onClick={() => openEditModal(order)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 hover:bg-luxury-gold/20 rounded-lg transition-all whitespace-nowrap"
+                >
+                  <Edit2 className="h-3 w-3 shrink-0" /> Update
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmId(order.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 rounded-lg transition-all whitespace-nowrap"
+                >
+                  <Trash2 className="h-3 w-3 shrink-0" /> Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="flex lg:hidden items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="font-mono text-luxury-gold text-xs">{order.order_number || order.id?.slice(0,8).toUpperCase()}</span>
+                  {getStatusBadge(order.status)}
+                </div>
+                <p className="text-white font-medium text-sm">{order.customers?.name || '—'}</p>
+                <p className="text-gray-400 text-xs truncate">{order.customers?.email || '—'}</p>
+                <div className="flex items-center gap-3 mt-1 text-xs">
+                  <span className="font-serif text-luxury-gold font-semibold">${Number(order.total || 0).toFixed(2)}</span>
+                  <span className="text-gray-500">{formatDate(order.created_at)}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button onClick={() => openEditModal(order)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 rounded-lg whitespace-nowrap">
+                  <Edit2 className="h-3 w-3" /> Update
+                </button>
+                <button onClick={() => setDeleteConfirmId(order.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg whitespace-nowrap">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )) : (
+          <div className="bg-luxury-card border border-white/5 rounded-2xl px-6 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 text-gray-500">
+              <Search className="h-8 w-8" />
+              <p className="text-sm">{orders.length === 0 ? 'No orders yet. Place an order from the storefront!' : 'No orders match your search.'}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Edit Status Modal */}
@@ -242,7 +247,7 @@ export default function AdminOrders() {
               <div>
                 <h2 className="font-serif text-xl text-white">Update Order Status</h2>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {editingOrder.customer_name} · #{editingOrder.id?.slice(0, 8).toUpperCase()}
+                  {editingOrder.customers?.name || 'Unknown Customer'} · #{editingOrder.order_number || editingOrder.id?.toString().toUpperCase() || 'UNKNOWN'}
                 </p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
@@ -265,9 +270,10 @@ export default function AdminOrders() {
                 </select>
               </div>
               <div className="text-xs text-gray-500 bg-luxury-accent/30 rounded-lg p-3">
-                <p><span className="text-gray-400">Customer:</span> {editingOrder.customer_name}</p>
-                <p><span className="text-gray-400">Email:</span> {editingOrder.customer_email}</p>
-                <p><span className="text-gray-400">Total:</span> ${Number(editingOrder.total_amount || 0).toFixed(2)}</p>
+                <p><span className="text-gray-400">Order ID:</span> {editingOrder.order_number || editingOrder.id?.toString().toUpperCase() || '—'}</p>
+                <p><span className="text-gray-400">Customer:</span> {editingOrder.customers?.name || '—'}</p>
+                <p><span className="text-gray-400">Email:</span> {editingOrder.customers?.email || '—'}</p>
+                <p><span className="text-gray-400">Total:</span> ${Number(editingOrder.total || editingOrder.total_amount || 0).toFixed(2)}</p>
                 <p><span className="text-gray-400">Placed:</span> {formatDate(editingOrder.created_at)}</p>
               </div>
               <div className="flex gap-3 justify-end pt-2 border-t border-white/5">

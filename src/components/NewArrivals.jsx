@@ -8,6 +8,7 @@ import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
+import midnightBloomImg from '../assets/images/perfume_midnight_bloom.png';
 
 export default function NewArrivals() {
   const [addedItems, setAddedItems] = useState({});
@@ -69,6 +70,19 @@ export default function NewArrivals() {
       tag: 'New Release',
       badgeColor: 'bg-purple-950/80 text-purple-200 border border-purple-500/20',
       notes: 'Night-blooming Jasmine, Neroli, Warm Amber'
+    },
+    {
+      id: 't5',
+      name: 'Midnight Bloom',
+      type: 'Eau de Parfum',
+      family: 'Floral',
+      price: 155,
+      rating: 4.8,
+      reviews: 15,
+      image: midnightBloomImg,
+      tag: 'New Release',
+      badgeColor: 'bg-purple-950/80 text-purple-200 border border-purple-500/20',
+      notes: 'Black Orchid, Midnight Rose, Patchouli'
     }
   ];
 

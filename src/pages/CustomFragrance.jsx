@@ -77,9 +77,11 @@ export default function CustomFragrance() {
     
     try {
       const sid = localStorage.getItem('aura_session_id') || 'session_fallback';
+      const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('custom_fragrances').insert({
         id: customId,
         session_id: sid,
+        user_id: user?.id || null,
         name: customName,
         base_note: scentFamily,
         heart_note: selectedNotes.join(', '),

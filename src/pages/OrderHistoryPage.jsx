@@ -31,19 +31,21 @@ export default function OrderHistoryPage() {
     async function fetchOrders() {
       setLoading(true);
       try {
-        const sessionId = localStorage.getItem('aura_session_id');
-        if (!sessionId) {
-          console.log('OrderHistory: No session ID found, no orders to show.');
+        const myOrdersStr = localStorage.getItem('aura_my_orders');
+        const myOrders = myOrdersStr ? JSON.parse(myOrdersStr) : [];
+        
+        if (myOrders.length === 0) {
+          console.log('OrderHistory: No order IDs found in local storage.');
           setOrders([]);
           setLoading(false);
           return;
         }
 
-        console.log('OrderHistory: Fetching orders for session', sessionId);
+        console.log('OrderHistory: Fetching orders for IDs', myOrders);
         const { data, error: fetchErr } = await supabase
           .from('orders')
-          .select('*')
-          .eq('session_id', sessionId)
+          .select('*, customers(*), addresses(*), order_items(*, products(*))')
+          .in('id', myOrders)
           .order('created_at', { ascending: false });
 
         if (fetchErr) throw fetchErr;
@@ -124,7 +126,8 @@ export default function OrderHistoryPage() {
       <div className="space-y-4">
         {orders.map(order => {
           const isExpanded = expandedId === order.id;
-          const addr = order.shipping_address || {};
+          const addr = order.addresses || {};
+          const customer = order.customers || {};
           const date = order.created_at
             ? new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
             : '—';
@@ -142,9 +145,9 @@ export default function OrderHistoryPage() {
                   </div>
                   <div>
                     <p className="text-luxury-gold text-xs uppercase tracking-widest font-semibold mb-0.5">
-                      Order · {order.id?.slice(0, 8).toUpperCase()}
+                      {order.order_number || ('Order · ' + order.id?.slice(0, 8).toUpperCase())}
                     </p>
-                    <p className="text-white font-medium">{order.customer_name}</p>
+                    <p className="text-white font-medium">{customer.name || 'Guest'}</p>
                     <p className="text-gray-400 text-xs mt-0.5">{date}</p>
                   </div>
                 </div>
@@ -153,7 +156,7 @@ export default function OrderHistoryPage() {
                   <StatusBadge status={order.status} />
                   <div className="flex items-center gap-2">
                     <span className="font-serif text-xl text-luxury-gold font-bold">
-                      ${Number(order.total_amount || 0).toFixed(2)}
+                      ${Number(order.total || 0).toFixed(2)}
                     </span>
                     {isExpanded
                       ? <ChevronUp className="h-4 w-4 text-gray-400" />
@@ -170,27 +173,41 @@ export default function OrderHistoryPage() {
                     {/* Customer Info */}
                     <div>
                       <p className="text-xs text-luxury-gold uppercase tracking-widest mb-2 font-semibold">Contact</p>
-                      <p className="text-white">{order.customer_name}</p>
-                      <p className="text-gray-400">{order.customer_email}</p>
+                      <p className="text-white">{customer.name || 'Guest'}</p>
+                      <p className="text-gray-400">{customer.email || '—'}</p>
                     </div>
 
                     {/* Shipping Address */}
-                    {addr.street && (
+                    {addr.address && (
                       <div>
                         <p className="text-xs text-luxury-gold uppercase tracking-widest mb-2 font-semibold">Shipping Address</p>
-                        <p className="text-white">{addr.street}</p>
+                        <p className="text-white">{addr.address}</p>
                         <p className="text-gray-400">
-                          {[addr.city, addr.state, addr.zip].filter(Boolean).join(', ')}
+                          {[addr.city, addr.state, addr.postal_code].filter(Boolean).join(', ')}
                         </p>
                         <p className="text-gray-400">{addr.country}</p>
                       </div>
                     )}
                   </div>
 
+                  {order.order_items?.length > 0 && (
+                    <div className="border-t border-white/5 pt-4">
+                      <p className="text-xs text-luxury-gold uppercase tracking-widest mb-3 font-semibold">Items Ordered</p>
+                      <div className="space-y-2">
+                        {order.order_items.map((item, i) => (
+                          <div key={i} className="flex justify-between text-sm">
+                            <span className="text-gray-300">{item.products?.name || item.product_id} × {item.quantity}</span>
+                            <span className="text-white font-medium">${Number(item.price * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center border-t border-white/5 pt-4">
                     <span className="text-gray-400 uppercase tracking-widest text-xs">Order Total</span>
                     <span className="font-serif text-xl text-luxury-gold font-bold">
-                      ${Number(order.total_amount || 0).toFixed(2)}
+                      ${Number(order.total || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>

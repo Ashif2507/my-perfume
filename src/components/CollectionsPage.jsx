@@ -1,8 +1,11 @@
 import { Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
+import leatherSmokeImg from '../assets/images/perfume_leather_smoke.png';
+import midnightVelvetImg from '../assets/images/perfume_midnight_velvet.png';
 
 export default function CollectionsPage() {
   const collections = [
@@ -33,6 +36,20 @@ export default function CollectionsPage() {
       description: 'A burst of revitalizing energy. Crisp marine accents blend with zesty citrus and cool mint for a truly refreshing signature scent.',
       notes: 'Crisp & Energizing',
       color: 'from-teal-500/20 to-transparent'
+    },
+    {
+      name: 'Leather & Smoke',
+      image: leatherSmokeImg,
+      description: 'Bold, provocative, and intensely charismatic. An avant-garde blend of raw leather, smoked birch, and rich tobacco leaf.',
+      notes: 'Bold & Charismatic',
+      color: 'from-orange-600/20 to-transparent'
+    },
+    {
+      name: 'Midnight Velvet',
+      image: midnightVelvetImg,
+      description: 'The epitome of after-hours elegance. Dark orchids intertwine with sensual musk and black cherry for an undeniably captivating aura.',
+      notes: 'Elegant & Captivating',
+      color: 'from-indigo-500/20 to-transparent'
     }
   ];
 
@@ -89,9 +106,9 @@ export default function CollectionsPage() {
                   {col.description}
                 </p>
                 <div className="pt-4">
-                  <button className="btn-gold px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-semibold hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
+                  <Link to="/#products" className="inline-block btn-gold px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-semibold hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                     Explore {col.name.split(' ')[0]}
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

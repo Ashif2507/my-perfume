@@ -8,6 +8,7 @@ import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
+import ceruleanTideImg from '../assets/images/perfume_cerulean_tide.png';
 
 export default function BestSellers() {
   const [addedItems, setAddedItems] = useState({});
@@ -72,6 +73,20 @@ export default function BestSellers() {
       badgeColor: 'bg-rose-950/80 text-rose-200 border border-rose-500/20',
       notes: 'Tahitian Vanilla, Labdanum, Tonka Bean, Sandalwood',
       desc: 'Irresistibly warm and gourmand — the scent equivalent of a cashmere embrace.',
+      section: 'Top Rated'
+    },
+    {
+      id: 'tr5',
+      name: 'Cerulean Tide',
+      type: 'Eau de Cologne',
+      price: 130,
+      rating: 5.0,
+      reviews: 89,
+      image: ceruleanTideImg,
+      badge: '★ 5.0 Perfect Score',
+      badgeColor: 'bg-emerald-950/80 text-emerald-200 border border-emerald-500/20',
+      notes: 'Sea Salt, Bergamot, Driftwood',
+      desc: 'An invigorating oceanic experience that brings the beach to your skin.',
       section: 'Top Rated'
     }
   ];

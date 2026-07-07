@@ -39,7 +39,17 @@ export function useSupabaseData(tableName, fallbackData = [], options = {}) {
 
         if (isMounted) {
           if (supaData && supaData.length > 0) {
-            setData(supaData);
+            // Merge fallback data and supabase data so hardcoded items are not lost
+            const merged = [...fallbackData];
+            supaData.forEach(item => {
+              const idx = merged.findIndex(i => i.id === item.id);
+              if (idx > -1) {
+                merged[idx] = item;
+              } else {
+                merged.push(item);
+              }
+            });
+            setData(merged);
           } else {
             setData(fallbackData);
           }

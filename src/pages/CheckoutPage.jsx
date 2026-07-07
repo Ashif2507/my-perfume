@@ -1,16 +1,97 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { toast } from 'react-hot-toast';
-
+import { Country, State, City } from 'country-state-city';
+import Select from 'react-select';
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
 
   const [formData, setFormData] = useState({
-    name: '', email: '', street: '', city: '', state: '', zip: '', country: ''
+    name: '', email: '', street: '', zip: ''
   });
+
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+
+  const countryOptions = useMemo(() => 
+    Country.getAllCountries().map(c => ({ value: c.isoCode, label: c.name })), 
+  []);
+  
+  const stateOptions = useMemo(() => 
+    selectedCountry ? State.getStatesOfCountry(selectedCountry.value).map(s => ({ value: s.isoCode, label: s.name })) : [], 
+  [selectedCountry]);
+
+  const cityOptions = useMemo(() => 
+    selectedCountry && selectedState ? City.getCitiesOfState(selectedCountry.value, selectedState.value).map(c => ({ value: c.name, label: c.name })) : [], 
+  [selectedCountry, selectedState]);
+
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: '#0a0a0a', 
+      borderColor: state.isFocused ? '#D4AF37' : 'rgba(255, 255, 255, 0.1)',
+      padding: '0.15rem', 
+      borderRadius: '0.75rem',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: 'rgba(255, 255, 255, 0.2)'
+      },
+      cursor: 'pointer'
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: '#111',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      borderRadius: '0.75rem',
+      zIndex: 50,
+      marginTop: '4px'
+    }),
+    menuList: (base) => ({
+      ...base,
+      maxHeight: '200px'
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected 
+        ? 'rgba(212, 175, 55, 0.2)' 
+        : state.isFocused 
+          ? 'rgba(255, 255, 255, 0.05)'
+          : 'transparent',
+      color: state.isSelected ? '#D4AF37' : '#e5e7eb',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: 'rgba(212, 175, 55, 0.3)'
+      }
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#ffffff',
+      fontSize: '0.875rem'
+    }),
+    input: (base) => ({
+      ...base,
+      color: '#ffffff'
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: '#4b5563',
+      fontSize: '0.875rem'
+    }),
+    indicatorSeparator: () => ({
+      display: 'none'
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: '#9ca3af',
+      '&:hover': {
+        color: '#D4AF37'
+      }
+    })
+  };
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -27,6 +108,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!selectedCountry || !selectedState || !selectedCity) {
+      toast.error('Please complete your full shipping address (Country, State, City).');
+      return;
+    }
+
     setIsProcessing(true);
     console.log('--- CHECKOUT START ---');
     console.log('Cart Items:', cartItems);
@@ -36,23 +122,70 @@ export default function CheckoutPage() {
     const fallbackOrderId = 'ORD-' + Date.now();
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Step 0: Ensure customer exists
+      console.log('Step 0: Getting/Creating Customer...');
+      let customerId = null;
+      const { data: existingCustomer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', formData.email)
+        .maybeSingle();
+
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+      } else {
+        const newCustId = 'c_' + Date.now();
+        const { data: newCustomer, error: custError } = await supabase
+          .from('customers')
+          .insert([{ id: newCustId, name: formData.name, email: formData.email, user_id: user?.id || null }])
+          .select()
+          .single();
+        if (!custError && newCustomer) {
+          customerId = newCustomer.id;
+        } else if (custError) {
+          console.error('Customer insert failed:', custError);
+        }
+      }
+
+      // Step 0.5 — Insert address FIRST so we have an address_id for the order
+      console.log('Step 0.5: Inserting Address...');
+      const newAddressId = 'a_' + Date.now();
+      let addressId = null;
+      
+      const { data: newAddress, error: addrError } = await supabase.from('addresses').insert([{
+        id: newAddressId,
+        address: formData.street,
+        city: selectedCity.label,
+        state: selectedState.label,
+        postal_code: formData.zip,
+        country: selectedCountry.label,
+        customer_id: customerId
+      }]).select().single();
+      
+      if (!addrError && newAddress) {
+        addressId = newAddress.id;
+        console.log('Step 0.5 ✅ Address saved');
+      } else {
+        console.warn('Step 0.5 ⚠️ Address save failed:', addrError);
+      }
+
       // Step 1 — Insert order
       console.log('Step 1: Inserting order...');
+      const newOrderId = 'o_' + Date.now();
       const { data: insertedOrders, error: orderError } = await supabase
         .from('orders')
         .insert([{
-          session_id: sessionId,
-          customer_name: formData.name,
-          customer_email: formData.email,
-          total_amount: Number(cartTotal) || 0,
+          id: newOrderId,
+          customer_id: customerId,
+          address_id: addressId,
+          user_id: user?.id || null,
+          order_number: fallbackOrderId,
+          total: Number(cartTotal) || 0,
           status: 'Processing',
-          shipping_address: {
-            street: formData.street,
-            city: formData.city,
-            state: formData.state,
-            zip: formData.zip,
-            country: formData.country
-          }
+          payment_method: 'Credit Card',
+          payment_status: 'Paid'
         }])
         .select();
 
@@ -62,10 +195,16 @@ export default function CheckoutPage() {
       } else {
         const dbOrderId = insertedOrders?.[0]?.id;
         console.log('Step 1 ✅ Order inserted with ID:', dbOrderId);
+        
+        if (dbOrderId) {
+          const myOrders = JSON.parse(localStorage.getItem('aura_my_orders') || '[]');
+          localStorage.setItem('aura_my_orders', JSON.stringify([...myOrders, dbOrderId]));
+        }
 
         // Step 2 — Insert order items
         if (dbOrderId) {
           const itemsPayload = cartItems.map(item => ({
+            id: 'oi_' + Math.random().toString(36).substr(2, 9),
             order_id: dbOrderId,
             product_id: String(item.id),
             quantity: Number(item.quantity) || 1,
@@ -75,17 +214,6 @@ export default function CheckoutPage() {
           if (itemsError) console.warn('Step 2 ⚠️ Order items failed:', itemsError.message);
           else console.log('Step 2 ✅ Order items inserted:', itemsPayload.length);
         }
-
-        // Step 3 — Save address
-        const { error: addrError } = await supabase.from('addresses').insert([{
-          street: formData.street,
-          city: formData.city,
-          state: formData.state,
-          zip: formData.zip,
-          country: formData.country
-        }]);
-        if (addrError) console.warn('Step 3 ⚠️ Address save failed:', addrError.message);
-        else console.log('Step 3 ✅ Address saved');
       }
 
       // Always succeed — clear cart and show success screen
@@ -186,25 +314,52 @@ export default function CheckoutPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">City *</label>
-                  <input required name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai"
-                    className="w-full bg-luxury-dark border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-luxury-gold transition-colors" />
+                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">Country *</label>
+                  <Select
+                    options={countryOptions}
+                    value={selectedCountry}
+                    onChange={(option) => {
+                      setSelectedCountry(option);
+                      setSelectedState(null);
+                      setSelectedCity(null);
+                    }}
+                    styles={customStyles}
+                    placeholder="Search Country"
+                    isSearchable
+                  />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">State *</label>
-                  <input required name="state" value={formData.state} onChange={handleInputChange} placeholder="Maharashtra"
-                    className="w-full bg-luxury-dark border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-luxury-gold transition-colors" />
+                  <Select
+                    options={stateOptions}
+                    value={selectedState}
+                    onChange={(option) => {
+                      setSelectedState(option);
+                      setSelectedCity(null);
+                    }}
+                    styles={customStyles}
+                    placeholder="Search State"
+                    isDisabled={!selectedCountry}
+                    isSearchable
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">ZIP Code *</label>
-                  <input required name="zip" value={formData.zip} onChange={handleInputChange} placeholder="400001"
-                    className="w-full bg-luxury-dark border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-luxury-gold transition-colors" />
+                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">City *</label>
+                  <Select
+                    options={cityOptions}
+                    value={selectedCity}
+                    onChange={(option) => setSelectedCity(option)}
+                    styles={customStyles}
+                    placeholder="Search City"
+                    isDisabled={!selectedState}
+                    isSearchable
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">Country *</label>
-                  <input required name="country" value={formData.country} onChange={handleInputChange} placeholder="India"
+                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2">ZIP Code *</label>
+                  <input required name="zip" value={formData.zip} onChange={handleInputChange} placeholder="400001"
                     className="w-full bg-luxury-dark border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-luxury-gold transition-colors" />
                 </div>
               </div>

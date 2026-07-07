@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useSupabaseData } from '../hooks/useSupabaseData';
 import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
@@ -96,9 +97,9 @@ export default function Categories() {
                   </p>
                   
                   {/* Hover discovery action */}
-                  <span className="inline-flex items-center text-xs uppercase tracking-widest font-semibold text-luxury-gold hover:text-luxury-goldlight transition-colors cursor-pointer">
+                  <Link to="/collection" className="inline-flex items-center text-xs uppercase tracking-widest font-semibold text-luxury-gold hover:text-luxury-goldlight transition-colors cursor-pointer">
                     Discover Collection &rarr;
-                  </span>
+                  </Link>
                 </div>
               </div>
 

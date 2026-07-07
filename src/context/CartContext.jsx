@@ -54,7 +54,8 @@ export function CartProvider({ children }) {
         let { data: cart } = await supabase.from('carts').select('id').eq('session_id', sessionId).single();
         if (!cart) {
           console.log('CartContext: Creating new cart for session');
-          const { data: newCart } = await supabase.from('carts').insert({ session_id: sessionId }).select('id').single();
+          const { data: { user } } = await supabase.auth.getUser();
+          const { data: newCart } = await supabase.from('carts').insert({ session_id: sessionId, user_id: user?.id || null }).select('id').single();
           cart = newCart;
         }
         if (cart) {

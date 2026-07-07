@@ -53,7 +53,8 @@ export function WishlistProvider({ children }) {
         let { data: wishlist } = await supabase.from('wishlists').select('id').eq('session_id', sessionId).single();
         if (!wishlist) {
           console.log('WishlistContext: Creating new wishlist for session');
-          const { data: newWishlist } = await supabase.from('wishlists').insert({ session_id: sessionId }).select('id').single();
+          const { data: { user } } = await supabase.auth.getUser();
+          const { data: newWishlist } = await supabase.from('wishlists').insert({ session_id: sessionId, user_id: user?.id || null }).select('id').single();
           wishlist = newWishlist;
         }
         if (wishlist) {

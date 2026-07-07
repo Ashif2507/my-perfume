@@ -8,6 +8,7 @@ import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
+import eternalSpringImg from '../assets/images/perfume_eternal_spring.png';
 
 export default function GiftSets() {
   const [addedItems, setAddedItems] = useState({});
@@ -107,6 +108,21 @@ export default function GiftSets() {
       contents: ['10 x 3ml Miniature Extrait Vials', 'Handmade Scent Profile Journal', 'Gilded Custom Monogram Pen', '$50 Full-Bottle Credit Card'],
       notes: 'An exhaustive library of all AURA fragrance profiles',
       description: 'The ultimate interactive gift. Sample ten signature creations at leisure, with a voucher included to purchase their full-size favorite.'
+    },
+    {
+      id: 'g7',
+      name: 'Eternal Spring Collection',
+      category: "Women's",
+      price: 210,
+      valuePrice: 280,
+      rating: 4.9,
+      reviews: 22,
+      image: eternalSpringImg,
+      badge: 'New Arrival',
+      badgeColor: 'bg-purple-950/80 text-purple-200 border border-purple-500/20',
+      contents: ['100ml Peony Velvet', '50ml Rose Hair Mist', 'Scented Silk Scarf'],
+      notes: 'Pink Peony, Fresh Violet, Centifolia Rose',
+      description: 'A celebration of spring florals. Beautifully wrapped in our signature blossom-patterned gift box.'
     }
   ];
 

@@ -2,6 +2,9 @@ import floralImg from '../assets/images/perfume_floral.png';
 import woodyImg from '../assets/images/perfume_woody.png';
 import orientalImg from '../assets/images/perfume_oriental.png';
 import freshImg from '../assets/images/perfume_fresh.png';
+import midnightBloomImg from '../assets/images/perfume_midnight_bloom.png';
+import ceruleanTideImg from '../assets/images/perfume_cerulean_tide.png';
+import eternalSpringImg from '../assets/images/perfume_eternal_spring.png';
 
 // ── Shared Standard Products ───────────────────────────────────────────────
 export const standardProducts = [
@@ -182,6 +185,34 @@ export const standardProducts = [
     notes: 'Salted Sage, Juniper Berry, Sea Moss',
     desc: 'An oceanic and fresh scent that revitalizes the spirit.',
     category: 'Fresh'
+  },
+  {
+    id: 't5',
+    name: 'Midnight Bloom',
+    type: 'Eau de Parfum',
+    price: 155,
+    rating: 4.8,
+    reviews: 15,
+    image: midnightBloomImg,
+    badge: 'New Release',
+    badgeColor: 'bg-purple-950/80 text-purple-200 border border-purple-500/20',
+    notes: 'Black Orchid, Midnight Rose, Patchouli',
+    desc: 'A mysterious and captivating floral scent.',
+    category: 'Floral'
+  },
+  {
+    id: 'tr5',
+    name: 'Cerulean Tide',
+    type: 'Eau de Cologne',
+    price: 130,
+    rating: 5.0,
+    reviews: 89,
+    image: ceruleanTideImg,
+    badge: '★ 5.0 Perfect Score',
+    badgeColor: 'bg-emerald-950/80 text-emerald-200 border border-emerald-500/20',
+    notes: 'Sea Salt, Bergamot, Driftwood',
+    desc: 'An invigorating oceanic experience that brings the beach to your skin.',
+    category: 'Fresh'
   }
 ];
 
@@ -282,6 +313,22 @@ export const giftSetsData = [
     contents: ['10 x 3ml Miniature Extrait Vials', 'Handmade Scent Profile Journal', 'Gilded Custom Monogram Pen', '$50 Full-Bottle Credit Card'],
     notes: 'An exhaustive library of all AURA fragrance profiles',
     desc: 'The ultimate interactive gift. Sample ten signature creations at leisure, with a voucher included to purchase their full-size favorite.'
+  },
+  {
+    id: 'g7',
+    name: 'Eternal Spring Collection',
+    type: 'Gift Set',
+    category: "Women's",
+    price: 210,
+    valuePrice: 280,
+    rating: 4.9,
+    reviews: 22,
+    image: eternalSpringImg,
+    badge: 'New Arrival',
+    badgeColor: 'bg-purple-950/80 text-purple-200 border border-purple-500/20',
+    contents: ['100ml Peony Velvet', '50ml Rose Hair Mist', 'Scented Silk Scarf'],
+    notes: 'Pink Peony, Fresh Violet, Centifolia Rose',
+    desc: 'A celebration of spring florals. Beautifully wrapped in our signature blossom-patterned gift box.'
   }
 ];
 

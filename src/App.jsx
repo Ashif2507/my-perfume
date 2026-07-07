@@ -6,6 +6,7 @@ import { supabase } from './supabaseClient';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AdminLayout from './layouts/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Customer Pages
 import Hero from './components/Hero';
@@ -26,6 +27,8 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import CustomFragrance from './pages/CustomFragrance';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -71,10 +74,16 @@ function CustomerLayout() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order-history" element={<OrderHistoryPage />} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-history" element={<OrderHistoryPage />} />
+            <Route path="/profile" element={<OrderHistoryPage />} /> {/* Added for Profile request */}
+          </Route>
+
+          {/* Public Routes */}
           <Route path="/new-arrivals" element={<NewArrivals />} />
           <Route path="/gift-sets" element={<GiftSets />} />
           <Route path="/best-sellers" element={<BestSellers />} />
@@ -82,7 +91,9 @@ function CustomerLayout() {
           <Route path="/exclusive-offers" element={<OffersPage />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/custom-fragrance" element={<CustomFragrance />} />
-          
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
           {/* Catch-all customer route */}
           <Route path="*" element={
             <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
@@ -132,7 +143,11 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route path="dashboard" element={<AdminDashboard />} />
           
           <Route path="products" element={<AdminProducts />} />

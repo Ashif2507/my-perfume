@@ -132,82 +132,93 @@ export default function AdminCustomers() {
         </div>
       </div>
 
-      {/* Customers Table */}
-      <div className="bg-luxury-card border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-300 whitespace-nowrap">
-            <thead className="bg-luxury-accent/50 text-xs uppercase tracking-widest text-gray-400 border-b border-white/5">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Customer</th>
-                <th className="px-6 py-4 font-semibold">Contact Info</th>
-                <th className="px-6 py-4 font-semibold">Orders</th>
-                <th className="px-6 py-4 font-semibold">Total Spent</th>
-                <th className="px-6 py-4 font-semibold">Joined</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredCustomers.length > 0 ? (
-                filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-luxury-gold/20 text-luxury-gold flex items-center justify-center font-serif font-bold text-lg border border-luxury-gold/30">
-                          {customer.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{customer.name}</p>
-                          <p className="text-[10px] text-gray-500">{customer.id}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Mail className="h-3 w-3" /> {customer.email}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Phone className="h-3 w-3" /> {customer.phone || '—'}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">{customer.orders}</td>
-                    <td className="px-6 py-4 font-serif font-semibold text-white">${customer.spent.toLocaleString()}.00</td>
-                    <td className="px-6 py-4 text-gray-400">{customer.joined}</td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(customer.status)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => openEditModal(customer)}
-                          className="p-1.5 text-gray-400 hover:text-white bg-white/5 rounded transition-colors"
-                          title="Edit Customer"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => setDeleteConfirmId(customer.id)}
-                          className="p-1.5 text-gray-400 hover:text-rose-500 bg-white/5 rounded transition-colors"
-                          title="Delete Customer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
-                    No customers found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Column headers */}
+      <div className="hidden lg:grid grid-cols-[1.5fr_1.5fr_0.6fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-2 text-[10px] uppercase tracking-widest text-gray-500 font-semibold border-b border-white/5">
+        <span>Customer</span>
+        <span>Contact Info</span>
+        <span>Orders</span>
+        <span>Total Spent</span>
+        <span>Joined</span>
+        <span>Status</span>
+        <span className="text-center w-40">Actions</span>
+      </div>
+
+      {/* Rows */}
+      <div className="space-y-2">
+        {filteredCustomers.length > 0 ? filteredCustomers.map((customer) => (
+          <div key={customer.id} className="bg-luxury-card border border-white/5 rounded-2xl px-5 py-4 hover:border-luxury-gold/20 transition-all group">
+
+            {/* Desktop */}
+            <div className="hidden lg:grid grid-cols-[1.5fr_1.5fr_0.6fr_1fr_1fr_1fr_auto] gap-4 items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-luxury-gold/20 text-luxury-gold flex items-center justify-center font-serif font-bold text-lg border border-luxury-gold/30 shrink-0">
+                  {customer.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">{customer.name}</p>
+                  <p className="text-[10px] text-gray-500">{customer.id}</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Mail className="h-3 w-3 shrink-0" /> <span className="truncate">{customer.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Phone className="h-3 w-3 shrink-0" /> {customer.phone || '—'}
+                </div>
+              </div>
+              <span className="text-gray-300 text-sm">{customer.orders}</span>
+              <span className="font-serif font-semibold text-white">${customer.spent.toLocaleString()}.00</span>
+              <span className="text-gray-400 text-sm">{customer.joined}</span>
+              <span>{getStatusBadge(customer.status)}</span>
+              <div className="flex items-center gap-2 w-40">
+                <button
+                  onClick={() => openEditModal(customer)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 hover:bg-luxury-gold/20 rounded-lg transition-all whitespace-nowrap"
+                >
+                  <Edit2 className="h-3 w-3 shrink-0" /> Edit
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmId(customer.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 rounded-lg transition-all whitespace-nowrap"
+                >
+                  <Trash2 className="h-3 w-3 shrink-0" /> Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="flex lg:hidden items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-luxury-gold/20 text-luxury-gold flex items-center justify-center font-serif font-bold text-lg border border-luxury-gold/30 shrink-0">
+                  {customer.name.charAt(0)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-white text-sm">{customer.name}</p>
+                  <p className="text-gray-400 text-xs truncate">{customer.email}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    {getStatusBadge(customer.status)}
+                    <span className="text-luxury-gold font-serif text-xs font-semibold">${customer.spent.toLocaleString()}</span>
+                    <span className="text-gray-500 text-xs">{customer.orders} orders</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button onClick={() => openEditModal(customer)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-luxury-gold bg-luxury-gold/10 border border-luxury-gold/30 rounded-lg whitespace-nowrap">
+                  <Edit2 className="h-3 w-3" /> Edit
+                </button>
+                <button onClick={() => setDeleteConfirmId(customer.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg whitespace-nowrap">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )) : (
+          <div className="bg-luxury-card border border-white/5 rounded-2xl px-6 py-12 text-center text-gray-500">
+            No customers found.
+          </div>
+        )}
       </div>
 
       {/* Edit Customer Modal */}

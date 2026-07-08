@@ -6,6 +6,8 @@ import { supabase } from '../supabaseClient';
 import { toast } from 'react-hot-toast';
 import { Country, State, City } from 'country-state-city';
 import Select from 'react-select';
+import { loadRazorpayScript, createRazorpayOrder, verifyRazorpayPayment } from '../services/paymentService';
+
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
 
@@ -118,120 +120,196 @@ export default function CheckoutPage() {
     console.log('Cart Items:', cartItems);
     console.log('Cart Total:', cartTotal);
 
-    const sessionId = localStorage.getItem('aura_session_id') || ('guest_' + Date.now());
     const fallbackOrderId = 'ORD-' + Date.now();
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Step 0: Ensure customer exists
-      console.log('Step 0: Getting/Creating Customer...');
-      let customerId = null;
-      const { data: existingCustomer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('email', formData.email)
-        .maybeSingle();
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-      } else {
-        const newCustId = 'c_' + Date.now();
-        const { data: newCustomer, error: custError } = await supabase
-          .from('customers')
-          .insert([{ id: newCustId, name: formData.name, email: formData.email, user_id: user?.id || null }])
-          .select()
-          .single();
-        if (!custError && newCustomer) {
-          customerId = newCustomer.id;
-        } else if (custError) {
-          console.error('Customer insert failed:', custError);
-        }
+      // Step 1: Load the Razorpay checkout SDK script dynamically
+      console.log('Step 1: Loading Razorpay SDK...');
+      const sdkLoaded = await loadRazorpayScript();
+      if (!sdkLoaded) {
+        throw new Error('Failed to load Razorpay checkout script. Please check your internet connection.');
       }
+      console.log('Step 1 ✅ Razorpay SDK loaded');
 
-      // Step 0.5 — Insert address FIRST so we have an address_id for the order
-      console.log('Step 0.5: Inserting Address...');
-      const newAddressId = 'a_' + Date.now();
-      let addressId = null;
-      
-      const { data: newAddress, error: addrError } = await supabase.from('addresses').insert([{
-        id: newAddressId,
-        address: formData.street,
-        city: selectedCity.label,
-        state: selectedState.label,
-        postal_code: formData.zip,
-        country: selectedCountry.label,
-        customer_id: customerId
-      }]).select().single();
-      
-      if (!addrError && newAddress) {
-        addressId = newAddress.id;
-        console.log('Step 0.5 ✅ Address saved');
-      } else {
-        console.warn('Step 0.5 ⚠️ Address save failed:', addrError);
-      }
+      // Step 2: Create a Razorpay order via our backend
+      console.log('Step 2: Creating Razorpay order...');
+      const orderData = await createRazorpayOrder(cartTotal, 'INR');
+      console.log('Step 2 ✅ Razorpay order created:', orderData.order_id);
 
-      // Step 1 — Insert order
-      console.log('Step 1: Inserting order...');
-      const newOrderId = 'o_' + Date.now();
-      const { data: insertedOrders, error: orderError } = await supabase
-        .from('orders')
-        .insert([{
-          id: newOrderId,
-          customer_id: customerId,
-          address_id: addressId,
-          user_id: user?.id || null,
-          order_number: fallbackOrderId,
-          total: Number(cartTotal) || 0,
-          status: 'Processing',
-          payment_method: 'Credit Card',
-          payment_status: 'Paid'
-        }])
-        .select();
+      // Step 3: Open the Razorpay checkout widget
+      const razorpayOptions = {
+        key: orderData.key_id,           // Public key returned from backend
+        amount: orderData.amount,        // Amount in paise (smallest INR unit)
+        currency: orderData.currency,
+        name: 'AURA Perfumes',
+        description: `Order ${fallbackOrderId}`,
+        order_id: orderData.order_id,
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+        },
+        theme: {
+          color: '#D4AF37', // Luxury gold brand colour
+        },
+        modal: {
+          ondismiss: () => {
+            // User closed the checkout modal without completing payment
+            setIsProcessing(false);
+            toast.error('Payment cancelled. Your order was not placed.', {
+              style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' },
+            });
+            console.warn('--- PAYMENT CANCELLED BY USER ---');
+          },
+        },
+        handler: async (response) => {
+          // This callback fires after a successful payment
+          console.log('Step 3 ✅ Razorpay payment successful:', response);
 
-      if (orderError) {
-        // Table might not exist — log clearly and use local fallback
-        console.warn('Supabase order failed (run the SQL schema first!):', orderError.message);
-      } else {
-        const dbOrderId = insertedOrders?.[0]?.id;
-        console.log('Step 1 ✅ Order inserted with ID:', dbOrderId);
-        
-        if (dbOrderId) {
-          const myOrders = JSON.parse(localStorage.getItem('aura_my_orders') || '[]');
-          localStorage.setItem('aura_my_orders', JSON.stringify([...myOrders, dbOrderId]));
-        }
+          try {
+            // Step 4: Verify the payment signature on the backend
+            console.log('Step 4: Verifying payment signature...');
+            const verification = await verifyRazorpayPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
 
-        // Step 2 — Insert order items
-        if (dbOrderId) {
-          const itemsPayload = cartItems.map(item => ({
-            id: 'oi_' + Math.random().toString(36).substr(2, 9),
-            order_id: dbOrderId,
-            product_id: String(item.id),
-            quantity: Number(item.quantity) || 1,
-            price: Number(item.price) || 0
-          }));
-          const { error: itemsError } = await supabase.from('order_items').insert(itemsPayload);
-          if (itemsError) console.warn('Step 2 ⚠️ Order items failed:', itemsError.message);
-          else console.log('Step 2 ✅ Order items inserted:', itemsPayload.length);
-        }
-      }
+            if (!verification.success) {
+              throw new Error('Payment signature verification failed. Please contact support.');
+            }
+            console.log('Step 4 ✅ Payment signature verified');
 
-      // Always succeed — clear cart and show success screen
-      clearCart();
-      setConfirmedOrderId(fallbackOrderId);
-      setOrderSuccess(true);
-      toast.success('Order placed successfully!', {
-        style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' }
+            // Step 5: Save order and customer data to Supabase
+            const { data: { user } } = await supabase.auth.getUser();
+
+            console.log('Step 5a: Getting/Creating Customer...');
+            let customerId = null;
+            const { data: existingCustomer } = await supabase
+              .from('customers')
+              .select('id')
+              .eq('email', formData.email)
+              .maybeSingle();
+
+            if (existingCustomer) {
+              customerId = existingCustomer.id;
+            } else {
+              const newCustId = 'c_' + Date.now();
+              const { data: newCustomer, error: custError } = await supabase
+                .from('customers')
+                .insert([{ id: newCustId, name: formData.name, email: formData.email, user_id: user?.id || null }])
+                .select()
+                .single();
+              if (!custError && newCustomer) {
+                customerId = newCustomer.id;
+              } else if (custError) {
+                console.error('Customer insert failed:', custError);
+              }
+            }
+
+            console.log('Step 5b: Inserting Address...');
+            const newAddressId = 'a_' + Date.now();
+            let addressId = null;
+            const { data: newAddress, error: addrError } = await supabase
+              .from('addresses')
+              .insert([{
+                id: newAddressId,
+                address: formData.street,
+                city: selectedCity.label,
+                state: selectedState.label,
+                postal_code: formData.zip,
+                country: selectedCountry.label,
+                customer_id: customerId,
+              }])
+              .select()
+              .single();
+            if (!addrError && newAddress) {
+              addressId = newAddress.id;
+              console.log('Step 5b ✅ Address saved');
+            } else {
+              console.warn('Step 5b ⚠️ Address save failed:', addrError);
+            }
+
+            console.log('Step 5c: Inserting Order...');
+            const newOrderId = 'o_' + Date.now();
+            const { data: insertedOrders, error: orderError } = await supabase
+              .from('orders')
+              .insert([{
+                id: newOrderId,
+                customer_id: customerId,
+                address_id: addressId,
+                user_id: user?.id || null,
+                order_number: fallbackOrderId,
+                total: Number(cartTotal) || 0,
+                status: 'Processing',
+                payment_method: 'Razorpay',
+                payment_status: 'Paid',
+              }])
+              .select();
+
+            if (orderError) {
+              console.warn('Supabase order insert failed:', orderError.message);
+            } else {
+              const dbOrderId = insertedOrders?.[0]?.id;
+              console.log('Step 5c ✅ Order inserted:', dbOrderId);
+              if (dbOrderId) {
+                const myOrders = JSON.parse(localStorage.getItem('aura_my_orders') || '[]');
+                localStorage.setItem('aura_my_orders', JSON.stringify([...myOrders, dbOrderId]));
+
+                // Step 5d: Insert order items
+                const itemsPayload = cartItems.map(item => ({
+                  id: 'oi_' + Math.random().toString(36).substr(2, 9),
+                  order_id: dbOrderId,
+                  product_id: String(item.id),
+                  quantity: Number(item.quantity) || 1,
+                  price: Number(item.price) || 0,
+                }));
+                const { error: itemsError } = await supabase.from('order_items').insert(itemsPayload);
+                if (itemsError) console.warn('Step 5d ⚠️ Order items failed:', itemsError.message);
+                else console.log('Step 5d ✅ Order items inserted:', itemsPayload.length);
+              }
+            }
+
+            // Step 6: Clear cart and show success screen
+            clearCart();
+            setConfirmedOrderId(fallbackOrderId);
+            setOrderSuccess(true);
+            toast.success('Payment successful! Order confirmed.', {
+              style: { background: '#111', color: '#D4AF37', border: '1px solid #D4AF37' },
+            });
+            console.log('--- CHECKOUT SUCCESS ---', fallbackOrderId);
+          } catch (verifyErr) {
+            console.error('--- POST-PAYMENT ERROR ---', verifyErr);
+            toast.error('Payment received but verification failed: ' + (verifyErr?.message || 'Unknown error'), {
+              style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' },
+              duration: 8000,
+            });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+      };
+
+      // Instantiate and open the Razorpay checkout widget
+      const rzp = new window.Razorpay(razorpayOptions);
+
+      // Handle payment failure events from the widget
+      rzp.on('payment.failed', (response) => {
+        console.error('--- PAYMENT FAILED ---', response.error);
+        toast.error(`Payment failed: ${response.error.description || 'Please try again.'}`, {
+          style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' },
+          duration: 6000,
+        });
+        setIsProcessing(false);
       });
-      console.log('--- CHECKOUT SUCCESS ---', fallbackOrderId);
+
+      rzp.open();
 
     } catch (err) {
       console.error('--- CHECKOUT FATAL ERROR ---', err);
       toast.error('Something went wrong: ' + (err?.message || 'Unknown error'), {
         style: { background: '#111', color: '#ef4444', border: '1px solid #ef4444' },
-        duration: 6000
+        duration: 6000,
       });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -366,31 +444,34 @@ export default function CheckoutPage() {
             </div>
           </section>
 
-          {/* Payment */}
+          {/* Payment — Powered by Razorpay */}
           <section>
             <h2 className="font-serif text-xl mb-5 text-luxury-gold border-b border-luxury-gold/20 pb-3">
               Payment Details
             </h2>
             <div className="bg-luxury-dark/60 border border-luxury-gold/20 rounded-2xl p-6 text-center space-y-3">
               <ShieldCheck className="h-10 w-10 text-luxury-gold mx-auto" />
-              <p className="text-white font-medium">Payment simulated in demo mode</p>
-              <p className="text-gray-400 text-sm">Your order will be recorded and confirmed instantly upon submission.</p>
+              <p className="text-white font-medium">Secured by Razorpay</p>
+              <p className="text-gray-400 text-sm">
+                Your payment is processed securely. Click <span className="text-luxury-gold font-semibold">Pay Now</span> to open the Razorpay checkout.
+              </p>
               <div className="flex justify-center gap-3 pt-2 text-gray-600 text-xs uppercase tracking-wider">
-                <span>Visa</span><span>·</span><span>Mastercard</span><span>·</span><span>UPI</span><span>·</span><span>Net Banking</span>
+                <span>Visa</span><span>·</span><span>Mastercard</span><span>·</span><span>UPI</span><span>·</span><span>Net Banking</span><span>·</span><span>Wallets</span>
               </div>
             </div>
           </section>
 
-          {/* Submit */}
+          {/* Submit — Pay Now */}
           <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-6">
             <div className="text-center sm:text-left">
               <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Order Total</p>
-              <p className="text-3xl font-serif text-luxury-gold font-bold">${(cartTotal || 0).toFixed(2)}</p>
+              <p className="text-3xl font-serif text-luxury-gold font-bold">₹{(cartTotal || 0).toFixed(2)}</p>
             </div>
 
+            {/* Pay Now button — triggers Razorpay checkout on form submit */}
             <button
               type="submit"
-              id="checkout-submit-btn"
+              id="checkout-pay-now-btn"
               disabled={isProcessing}
               className="btn-gold w-full sm:w-auto px-12 py-4 rounded-xl text-sm uppercase tracking-widest flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
             >
@@ -401,7 +482,7 @@ export default function CheckoutPage() {
                 </>
               ) : (
                 <>
-                  Complete Purchase
+                  Pay Now
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}

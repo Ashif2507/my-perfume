@@ -14,6 +14,8 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+
+
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account';
 
   const handleLogout = async () => {
@@ -95,6 +97,8 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
 
           {/* Utility Icons */}
           <div className="hidden xl:flex items-center xl:gap-x-4 2xl:gap-x-9">
+            
+            
             
             {/* Search Dropdown Panel */}
             <div className="relative flex items-center" ref={searchRef}>
@@ -277,6 +281,7 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
 
           {/* Mobile menu button */}
           <div className="xl:hidden flex items-center space-x-4">
+            
             <Link to="/cart" className="relative text-gray-300 hover:text-luxury-gold transition-colors p-1" aria-label="Shopping Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (

@@ -110,6 +110,48 @@ function CustomerLayout() {
 
 function App() {
   useEffect(() => {
+    const testBackendConnection = async () => {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      
+      if (!apiUrl) {
+        console.error("❌ Backend Connection Failed");
+        console.error("Diagnostic Suggestion: Environment variable VITE_API_URL is missing or undefined in the .env file.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${apiUrl}/api/test`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("✅ Backend Connected Successfully");
+          console.log("Backend Response:", data);
+        } else {
+          console.error("❌ Backend Connection Failed");
+          console.error(`HTTP Status Error: ${res.status} ${res.statusText}`);
+          
+          if (res.status === 404) {
+            console.error("Diagnostic Suggestion: Received 404 Not Found. Verify the '/api/test' endpoint is defined on the backend server and that VITE_API_URL points to the correct base path.");
+          } else {
+            console.error("Diagnostic Suggestion: The backend server is reachable but returned an error status. Check backend logs.");
+          }
+        }
+      } catch (err) {
+        console.error("❌ Backend Connection Failed");
+        console.error(err);
+        
+        const errorMsg = String(err.message || err).toLowerCase();
+        if (errorMsg.includes("failed to fetch") || errorMsg.includes("networkerror") || errorMsg.includes("network error")) {
+          console.error("Diagnostic Checklist & Suggestions:");
+          console.error("1. CORS issue: Check if the 'cors' package is installed and configured on the backend with 'app.use(cors())'.");
+          console.error("2. Incorrect API URL: Verify VITE_API_URL matches the Render URL exactly (https://backend-perfume.onrender.com) and is correctly loaded from .env.");
+          console.error("3. Render Deployment: Render free instances spin down after inactivity. Visit https://backend-perfume.onrender.com/api/test directly in the browser to spin it up.");
+          console.error("4. Fetch/Axios error: Ensure the backend server is running and accessible over HTTPS without SSL/TLS issues.");
+        } else {
+          console.error("Diagnostic Suggestion: Fetch request failed. Verify that VITE_API_URL is valid and the network is online.");
+        }
+      }
+    };
+
     const fetchAllTables = async () => {
       const tables = [
         'collections', 'testimonials', 'custom_fragrance_notes', 
@@ -136,6 +178,7 @@ function App() {
       console.log('Supabase Fetches Complete:', results);
     };
     
+    testBackendConnection();
     fetchAllTables();
   }, []);
 
